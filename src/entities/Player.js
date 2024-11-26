@@ -12,44 +12,37 @@ class Player {
         this.position = new THREE.Vector3(0, 10, 0);
         this.speed = 0.1;
 
-        // Create the physics object for the player
-        this.physicsObject = new PhysicsObject(this.scene, this.position.x, this.position.y, this.position.z, this.size.x, this.size.y, this.size.z);
-
         // Create the visual representation of physics body 
-        this.createPlayerMesh();
+        this.mesh = this.createPlayerMesh();
+
+        // Create the physics object for the player
+        this.physicsObject = new PhysicsObject(this.scene, this.mesh, true, 'player');
+
+        // Add the physics object to the physics engine
+        this.physicsEngine.addObject(this.physicsObject);
     }
 
     createPlayerMesh() {
         // Basic box for now 
         var geometry = new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z);
         var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.position.copy(this.position);
-        this.scene.add(this.mesh);
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.position.copy(this.position);
+        this.scene.add(mesh);
+        return mesh;
     }
 
     updateMovement() {
         var moveDirection = new THREE.Vector3(0, 0, 0);
 
         // Check if the forward key is pressed
-        if (this.inputHandler.moveForward) {
-            moveDirection.z -= 1; // Move forward
-        }
-
+        if (this.inputHandler.moveForward) moveDirection.z -= 1;
         // Check if the backward key is pressed
-        if (this.inputHandler.moveBackward) {
-            moveDirection.z += 1; // Move backward
-        }
-
+        if (this.inputHandler.moveBackward) moveDirection.z += 1;
         // Check if the left key is pressed
-        if (this.inputHandler.moveLeft) {
-            moveDirection.x -= 1; // Move left
-        }
-
+        if (this.inputHandler.moveLeft) moveDirection.x -= 1;
         // Check if the right key is pressed
-        if (this.inputHandler.moveRight) {
-            moveDirection.x += 1; // Move right
-        }
+        if (this.inputHandler.moveRight) moveDirection.x += 1;
 
         // Normalize the direction to prevent faster diagonal movement
         moveDirection.normalize();
@@ -64,38 +57,21 @@ class Player {
         }
 
         // Handle jumping if spacebar is pressed and player is grounded
-        // Need to apply an upper bound on jumping but im too eepy
-        // Also need to consider if we want double jumping or not 
-        if (this.inputHandler.jump) {
-            this.physicsObject.velocity.y = 5; // Simple jump force
+        // Also need to consider if we want double jumping or not
+        if (this.inputHandler.jump && this.physicsObject.velocity.y === 0) {
+            this.physicsObject.velocity.y = 10;
         }
     }
 
     update(deltaTime) {
-    
         // Update player movement based on input
-        this.updateMovement(deltaTime);
-    
+        this.updateMovement();
         // Update the physics object (this will update position, apply gravity, etc.)
-        this.physicsObject.update(deltaTime);
-    
-        // Resolve collision with all objects
-        this.physicsEngine.objects.forEach(otherObject => {
-            if (otherObject !== this.physicsObject) {
-                // Resolve collisions using the resolveCollision method in PhysicsObject
-                this.physicsObject.resolveCollision(otherObject, deltaTime);
-            }
-        });
-    
+        this.physicsObject.update();
+
         // Update mesh position based on physics object position
         this.mesh.position.copy(this.physicsObject.position);
-    
-        // Update bounding box helper position and size
-        this.physicsObject.updateBoundingBox(); 
     }
-    
-
-
 }
 
 export default Player;

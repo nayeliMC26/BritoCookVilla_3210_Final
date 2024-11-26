@@ -12,10 +12,9 @@ class Main {
         document.body.appendChild(this.renderer.domElement);
 
         // Initialize the Game instance
-        this.game = new Game(this.renderer);
+        this.game = new Game(this.renderer); 
+        console.log('Press 1, 2, or 3 to switch between levels.');
 
-        // Game initialization (async loading, scene setup)
-        this.game.init();
         // Start game loop
         this.game.start();
 

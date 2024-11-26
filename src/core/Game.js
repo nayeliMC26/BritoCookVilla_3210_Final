@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import InputHandler from '../utils/InputHandler.js';
 import Player from '../entities/Player.js';
-import Platform from '../entities/Platform.js';
 import PhysicsEngine from '../utils/PhysicsEngine.js';
+import LevelManager from '../levels/LevelManager.js';
+import Stats from 'three/examples/jsm/libs/stats.module'
 
 class Game {
     constructor(renderer) {
@@ -14,27 +15,30 @@ class Game {
         // Temporary for debugging
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+        this.stats = new Stats();
+        document.body.appendChild(this.stats.dom)
+
+
         // Create an inputHandler instance
         this.inputHandler = new InputHandler();
         this.inputHandler.keyboardControls();
 
         // Create a new physics engine instance
-        this.physicsEngine = new PhysicsEngine();
+        this.physicsEngine = new PhysicsEngine(this.scene);
 
         // three body problem ??? ez !
 
         // Create player and add to the physics engine
         this.player = new Player(this.scene, this.inputHandler, this.physicsEngine);
 
-        // Create some platforms and addthem  to the physics engine
-        this.platform = new Platform(this.scene, 0, 0, 0, 30, 1, 20, this.physicsEngine);
+        // Initialize the level manager
+        this.levelManager = new LevelManager(this.scene, this.player, this.physicsEngine);
+        this.sceneSetup();
 
-        this.platform2 = new Platform(this.scene, 40, 2, 0, 20, 1, 20, this.physicsEngine)
+        // Set up levels
+        this.initLevels();
 
-        this.physicsEngine.addObject(this.player.physicsObject);
-        this.physicsEngine.addObject(this.platform.physicsObject);
-        this.physicsEngine.addObject(this.platform2.physicsObject)
-
+        // Clock for deltaTime
         this.clock = new THREE.Clock();
     }
 
@@ -53,33 +57,62 @@ class Game {
         directionalLight.position.set(10, 30, 10);
         this.scene.add(directionalLight);
 
-        // Optionally, add a grid helper to visualize the ground
         var gridHelper = new THREE.GridHelper(100, 20);
         this.scene.add(gridHelper);
     }
 
-    // Initialize any asynchronous tasks 
-    async init() {
-        try {
-            console.log('Initializing game...');
 
-            // Initialize the scene (camera, lighting, etc.)
-            this.sceneSetup();
+    initLevels() {
+        // Define and add levels to the level manager
+        this.levelManager.addLevel({
+            spawnPoint: { x: 0, y: 10, z: 0 },
+            platforms: [
+                { x: 0, y: 0, z: 0, width: 30, height: 1, depth: 20 },
+                { x: 40, y: 2, z: 0, width: 20, height: 1, depth: 20 },
+            ],
+        });
 
-            console.log('Game initialized successfully');
-        } catch (error) {
-            console.error('Error during game initialization:', error);
-        }
+        this.levelManager.addLevel({
+            spawnPoint: { x: -30, y: 15, z: 0 },
+            platforms: [
+                { x: -10, y: 0, z: 0, width: 40, height: 1, depth: 20 },
+                { x: -30, y: 5, z: 0, width: 15, height: 1, depth: 10 },
+                {x: 10, y: 12, z: 2, width: 5, height: 2, depth: 10 }
+            ],
+        });
+
+        this.levelManager.addLevel({
+            spawnPoint: { x: 15, y: 20, z: 0 },
+            platforms: [
+                { x: 20, y: 0, z: 0, width: 50, height: 1, depth: 30 },
+                { x: 15, y: 10, z: 0, width: 10, height: 1, depth: 10 },
+            ],
+        });
+
+        // Load the first level by default
+        this.levelManager.loadLevel(0);
     }
 
     update(deltaTime) {
         // Update the player and other game logic
         this.player.update(deltaTime, this.physicsEngine.objects);
+
+        // Handle level switching
+        if (this.inputHandler.key1) {
+            this.levelManager.loadLevel(0);
+        }
+        if (this.inputHandler.key2) {
+            this.levelManager.loadLevel(1);
+        }
+        if (this.inputHandler.key3) {
+            this.levelManager.loadLevel(2);
+        }
     }
 
 
     start() {
         var gameLoop = () => {
+            this.stats.update();
             var deltaTime = this.clock.getDelta();
 
             // Update the physics engine and game state
