@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import Game from '../core/Game.js';
-import EscapeRoom from '../levels/escapeRoom/Scene.js'
+import EscapeRoom from "../levels/escapeRoom/Scene.js"
 
 /* Entry point for the app */
 class Main {
@@ -19,6 +19,7 @@ class Main {
         // this.game.init();
         // Start game loop
         // this.game.start();
+        this.clock = new THREE.Clock();;
 
         this.escapeRoom = new EscapeRoom(this.renderer);
 
@@ -32,8 +33,9 @@ class Main {
         this.animation();
     }
 
-    animation() {
-        this.escapeRoom.render();
+    animation(time) {
+        const deltaTime = this.clock.getDelta();
+        this.escapeRoom.render(time, deltaTime);
         requestAnimationFrame(this.animation.bind(this));
     }
 
