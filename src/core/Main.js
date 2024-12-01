@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import Stats from "three/examples/jsm/libs/stats.module.js";
 import Game from '../core/Game.js';
 import EscapeRoom from "../levels/escapeRoom/Scene.js"
 
@@ -12,6 +13,8 @@ class Main {
         this.renderer.setClearColor(0x272727);
         document.body.appendChild(this.renderer.domElement);
 
+        this.stats = new Stats();
+        document.body.appendChild(this.stats.dom);
         // Initialize the Game instance
         // this.game = new Game(this.renderer);
 
@@ -27,15 +30,17 @@ class Main {
         // Handle window resizing
         window.addEventListener('resize', () => {
             this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.game.onResize(window.innerWidth, window.innerHeight);
+            this.escapeRoom.onResize(window.innerWidth, window.innerHeight)
         });
 
         this.animation();
     }
 
     animation(time) {
+        this.stats.begin();
         const deltaTime = this.clock.getDelta();
         this.escapeRoom.render(time, deltaTime);
+        this.stats.end();
         requestAnimationFrame(this.animation.bind(this));
     }
 
