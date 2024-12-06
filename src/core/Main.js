@@ -9,20 +9,26 @@ class Main {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setClearColor(0x272727);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(this.renderer.domElement);
 
         // Initialize the Game instance
         this.game = new Game(this.renderer); 
-        console.log('Press 1, 2, or 3 to switch between levels.');
 
         // Start game loop
         this.game.start();
 
         // Handle window resizing
-        window.addEventListener('resize', () => {
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.game.onResize(window.innerWidth, window.innerHeight);
-        });
+        window.addEventListener('resize', this.onResize.bind(this));
+    }
+
+    onResize() {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+
+        this.renderer.setSize(width, height);
+        this.game.onResize(width, height);
     }
 }
 // App entry

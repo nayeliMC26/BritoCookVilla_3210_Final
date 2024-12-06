@@ -79,6 +79,45 @@ class PhysicsEngine {
         // Handle collisions after updating physics
         this.handleCollisions();
     }
-}
+    /**
+     * A function to remove all physics objects from the scene
+     */
+    clear() {
+        // Loop through all objects and remove them from the scene
+        this.objects.forEach((object) => {
+            // Remove the mesh from the scene and dispose of it
+            if (object.mesh) {
+                try {
+                    this.scene.remove(object.mesh);
+                    if (object.mesh.geometry) object.mesh.geometry.dispose();
+                    if (object.mesh.material) {
+                        if (Array.isArray(object.mesh.material)) {
+                            object.mesh.material.forEach((material) => material.dispose());
+                        } else {
+                            object.mesh.material.dispose();
+                        }
+                    }
+                    object.mesh = null; // Nullify the reference
+                } catch (error) {
+                    console.error("Error removing mesh during clear:", error);
+                }
+            }
 
+            // Remove the bounding box helper from the scene
+            if (object.boundingBoxHelper) {
+                try {
+                    this.scene.remove(object.boundingBoxHelper);
+                    object.boundingBoxHelper = null;
+                } catch (error) {
+                    console.error("Error removing bounding box helper during clear:", error);
+                }
+            }
+        });
+
+        // Clear the objects array
+        this.objects = [];
+        console.log("Physics engine cleared.");
+    }
+
+}
 export default PhysicsEngine;

@@ -53,20 +53,20 @@ class AssetLoader {
     }
 
     /**
-     * A function which takes in a string for the model's path and loads the model
+     * A function which takes in a string for the audio's path and loads the audio buffer
      * @param {String} path 
-     * @returns {Promise<THREE.Object3D>}
+     * @returns {Promise<THREE.AudioBuffer>}
      */
     loadAudio(path) {
         return new Promise((resolve, reject) => {
             this.audioLoader.load(
                 path,
-                (gltf) => {
-                    resolve(gltf.scene);
+                (audioBuffer) => {
+                    resolve(audioBuffer);
                 },
                 undefined,
                 (error) => {
-                    reject(`Error loading GLTF model at ${path}: ${error}`);
+                    reject(`Error loading audio at ${path}: ${error}`);
                 }
             );
         });
@@ -79,13 +79,15 @@ class AssetLoader {
     async loadAllAssets() {
         try {
             // Replace with asset paths
-            var texturePromise = this.loadTexture('path/to/texture.jpg');
+            var mapSketch = this.loadTexture('./textures/map sketch.png');
+            var modelPromise = this.loadGLTFModel('./models/wall.gltf')
 
             // Wait for all assets to load
-            var results = await Promise.all([texturePromise]);
+            var results = await Promise.all([mapSketch, modelPromise]);
 
             // Store loaded assets
-            this.assets.texture = results[0];
+            this.assets.map = results[0];
+            this.assets.wall = results[1];
 
             console.log('All assets loaded:', this.assets);
         } catch (error) {

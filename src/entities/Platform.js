@@ -22,7 +22,7 @@ class Platform {
     /* A function to create the visual representation of our physics body */
     createPlatformMesh() {
         var geometry = new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        var material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
         var mesh = new THREE.Mesh(geometry, material);
         mesh.position.copy(this.position);
         this.scene.add(mesh);
