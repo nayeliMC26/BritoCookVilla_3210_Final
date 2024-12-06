@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import Game from '../core/Game.js';
-import EscapeRoom from "../levels/escapeRoom/Scene.js"
 
 /* Entry point for the app */
 class Main {
@@ -20,16 +19,10 @@ class Main {
         // Initialize the Game instance
         this.game = new Game(this.renderer); 
 
-        // this.game = new Game(this.renderer);
-
-        // Game initialization (async loading, scene setup)
-        this.game.init();
-
         // Start game loop
-        // this.game.start();
+        this.game.start();
+
         this.clock = new THREE.Clock();;
-
-
 
         // Handle window resizing
 

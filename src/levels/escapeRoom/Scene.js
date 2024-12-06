@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-import Room from './Room'
-import Player from './Player'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import Room from '../../levels/escaperoom/Room.js'
+import Player from '../../levels/escaperoom/Player.js'
 
 class Scene {
     constructor(renderer) {
@@ -11,6 +10,9 @@ class Scene {
         this.camera.position.set(230, 65, 170);
         this.camera.updateProjectionMatrix();
 
+    }
+
+    init(){
         this.room = new Room(this.scene);
         this.player = new Player(this.scene, this.camera, this.room.areaBB, this.room.objectsBB);
 
@@ -20,13 +22,46 @@ class Scene {
         this.scene.add(axesHelper);
     }
 
-    animate(time, deltaTime) {
+    update(deltaTime) {
         this.player.update(deltaTime);
     }
 
     render(time, deltaTime) {
         this.animate(time, deltaTime);
         this.renderer.render(this.scene, this.camera);
+    }
+
+    clear() {
+        console.log('Clearing the scene...');
+
+        // Dispose geometries and materials of objects in the scene
+        this.scene.traverse((object) => {
+            if (object.geometry) {
+                object.geometry.dispose();
+            }
+            if (object.material) {
+                if (Array.isArray(object.material)) {
+                    object.material.forEach((material) => material.dispose());
+                } else {
+                    object.material.dispose();
+                }
+            }
+        });
+
+        // Remove all objects from the scene
+        while (this.scene.children.length > 0) {
+            var child = this.scene.children[0];
+            this.scene.remove(child);
+        }
+
+        // Nullify references to prevent memory leaks
+        this.scene = null;
+        this.camera = null;
+        this.clock = null;
+        this.player = null;
+
+
+        console.log('Scene cleared.');
     }
 
 
