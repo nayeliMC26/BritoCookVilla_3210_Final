@@ -39,7 +39,7 @@ class Main {
     animation(time) {
         this.stats.begin();
         const deltaTime = this.clock.getDelta();
-        this.escapeRoom.render(time, deltaTime);
+        this.escapeRoom.render(time / 1000, deltaTime);
         this.stats.end();
         requestAnimationFrame(this.animation.bind(this));
     }

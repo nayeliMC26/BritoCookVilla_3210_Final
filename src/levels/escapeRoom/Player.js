@@ -81,7 +81,7 @@ class Player {
         }
 
         // Apply velocity to move dirrection
-        this.moveDirection.multiplyScalar(velocity);
+        this.moveDirection.normalize().multiplyScalar(velocity)
 
         // 
         this.#handleAreaCollision();
@@ -135,6 +135,7 @@ class Player {
 
     keyboardControls() {
         document.addEventListener("keydown", (event) => {
+            if (!this.controls.isLocked) return;
             switch (event.key) {
                 case "w":
                     this.moveForward = true;
@@ -152,6 +153,7 @@ class Player {
         });
 
         document.addEventListener("keyup", (event) => {
+            if (!this.controls.isLocked) return;
             switch (event.key) {
                 case "w":
                     this.moveForward = false;
