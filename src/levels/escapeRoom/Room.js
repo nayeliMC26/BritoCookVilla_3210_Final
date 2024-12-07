@@ -88,6 +88,7 @@ class Room {
         this.scene.add(this.exit);
 
         this.rectLightHelper = new RectAreaLightHelper(this.exit);
+        this.rectLightHelper.visible = false;
         this.exit.add(this.rectLightHelper);
 
     }
@@ -123,9 +124,9 @@ class Room {
 
         // Buttons set up
         this.buttons = [];
-        // Button 1 (midle)
+        // Button 1 (middle)
         geometry = new THREE.BoxGeometry(9, 14, 5);
-        material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        material = new THREE.MeshBasicMaterial({ color: 0x500000 });
         this.buttons[0] = new THREE.Mesh(geometry, material);
         this.buttons[0].position.set(230, 55, 2.5);
         // Button 2 (left)
@@ -166,11 +167,12 @@ class Room {
         this.valves[0] = this.#makeValve();
         this.valves[0].rotateY(Math.PI / 2);
         this.valves[0].position.set(170.1, 50, 60);
-        this.valves[1] = this.valves[0].clone();
-        this.valves[1].position.z += 30;
-        this.valves[2] = this.valves[0].clone();
-        this.valves[2].position.z += -30;
-        console.log(this.valves[2].children)
+        this.valves[1] = this.#makeValve();
+        this.valves[1].rotateY(Math.PI / 2);
+        this.valves[1].position.set(170.1, 50, 90);
+        this.valves[2] = this.#makeValve();
+        this.valves[2].rotateY(Math.PI / 2);
+        this.valves[2].position.set(170.1, 50, 30);
         this.valves.forEach((valve) => this.interactiveOb.push(valve));
         this.scene.add(...this.valves);
 
@@ -257,9 +259,9 @@ class Room {
         const helper = new THREE.Box3Helper(this.areaBB[0], 0xffff00);
         const helper2 = new THREE.Box3Helper(this.areaBB[1], 0xff00ff);
         const helper3 = new THREE.Box3Helper(this.objectsBB[7], 0x00ffff);
-        // this.scene.add(helper);
-        // this.scene.add(helper2);
-        // this.scene.add(helper3);
+        this.scene.add(helper);
+        this.scene.add(helper2);
+        this.scene.add(helper3);
     }
 
     #makeValve() {
