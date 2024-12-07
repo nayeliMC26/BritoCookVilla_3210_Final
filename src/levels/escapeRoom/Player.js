@@ -17,7 +17,7 @@ class Player {
 
         // this.createFlashlight();
         this.#initPlayer();
-        this.#addCrosshair();
+        //this.#addCrosshair();
         this.keyboardControls();
     }
 
