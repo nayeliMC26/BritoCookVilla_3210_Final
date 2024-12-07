@@ -1,6 +1,8 @@
 import * as THREE from 'three';
-import Room from '../../levels/escaperoom/Room.js'
-import Player from '../../levels/escaperoom/Player.js'
+import Room from './Room'
+import Player from './Player'
+import Raycaster from './Raycaster';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 class Scene {
     constructor(renderer) {
@@ -15,15 +17,18 @@ class Scene {
     init(){
         this.room = new Room(this.scene);
         this.player = new Player(this.scene, this.camera, this.room.areaBB, this.room.objectsBB);
+        this.raycaster = new Raycaster(this.scene, this.camera, this.player.controls, this.room.interactiveOb);
+
 
         // const controls = new OrbitControls(this.camera, this.renderer.domElement);
         // this.camera.lookAt(this.camera.position);
         const axesHelper = new THREE.AxesHelper(120);
-        this.scene.add(axesHelper);
+        // this.scene.add(axesHelper);
     }
 
     update(deltaTime) {
         this.player.update(deltaTime);
+        this.raycaster.update(deltaTime);
     }
 
     render(time, deltaTime) {

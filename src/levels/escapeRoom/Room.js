@@ -87,8 +87,9 @@ class Room {
         this.exit.position.copy(this.exitBorder.position);
         this.scene.add(this.exit);
 
-        const rectLightHelper = new RectAreaLightHelper(this.exit);
-        this.exit.add(rectLightHelper);
+        this.rectLightHelper = new RectAreaLightHelper(this.exit);
+        this.rectLightHelper.visible = false;
+        this.exit.add(this.rectLightHelper);
 
     }
 
@@ -111,7 +112,6 @@ class Room {
         this.letter.rotateZ(-Math.PI / 2);
         this.letter.position.copy(this.table.position);
         this.letter.position.y += 16.01;
-        this.interactiveOb.push(this.letter.uuid);
         this.scene.add(this.letter);
 
         // Alphabet setup
@@ -124,9 +124,9 @@ class Room {
 
         // Buttons set up
         this.buttons = [];
-        // Button 1 (midle)
+        // Button 1 (middle)
         geometry = new THREE.BoxGeometry(9, 14, 5);
-        material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        material = new THREE.MeshBasicMaterial({ color: 0x500000 });
         this.buttons[0] = new THREE.Mesh(geometry, material);
         this.buttons[0].position.set(230, 55, 2.5);
         // Button 2 (left)
@@ -144,7 +144,7 @@ class Room {
         this.buttons[3] = new THREE.Mesh(geometry, material);
         this.buttons[3].rotateY(Math.PI / 2);
         this.buttons[3].position.set(2.5, 55, 200);
-        this.buttons.forEach((button) => this.interactiveOb.push(button.uuid));
+        this.buttons.forEach((button) => this.interactiveOb.push(button));
         this.scene.add(...this.buttons);
 
         // Pipes setup
@@ -156,10 +156,10 @@ class Room {
         this.pipes[0].position.set(160, 50, 60);
         // Left
         this.pipes[1] = this.pipes[0].clone();
-        this.pipes[1].position.z += -30;
+        this.pipes[1].position.z += 30;
         // Right
         this.pipes[2] = this.pipes[0].clone();
-        this.pipes[2].position.z += 30;
+        this.pipes[2].position.z += -30;
         this.scene.add(...this.pipes);
 
         // Valves setup
@@ -167,17 +167,19 @@ class Room {
         this.valves[0] = this.#makeValve();
         this.valves[0].rotateY(Math.PI / 2);
         this.valves[0].position.set(170.1, 50, 60);
-        this.valves[1] = this.valves[0].clone();
-        this.valves[1].position.z += -30;
-        this.valves[2] = this.valves[0].clone();
-        this.valves[2].position.z += 30;
-        this.valves.forEach((valve) => this.interactiveOb.push(valve.uuid));
+        this.valves[1] = this.#makeValve();
+        this.valves[1].rotateY(Math.PI / 2);
+        this.valves[1].position.set(170.1, 50, 90);
+        this.valves[2] = this.#makeValve();
+        this.valves[2].rotateY(Math.PI / 2);
+        this.valves[2].position.set(170.1, 50, 30);
+        this.valves.forEach((valve) => this.interactiveOb.push(valve));
         this.scene.add(...this.valves);
 
         // Stairs setup
         this.staircase = this.#makeStaircase();
         this.staircase.position.set(80, 50, 122.5);
-        this.interactiveOb.push(this.staircase.uuid);
+        this.interactiveOb.push(this.staircase);
         this.scene.add(this.staircase);
 
         // Light setup
@@ -199,6 +201,8 @@ class Room {
         this.lights[3].position.y += -95;
         this.lights[3].rotateZ(-2.035);
         this.scene.add(...this.lights);
+
+        this.interactiveOb.push(this.rectLightHelper, this.letter, this.alphabet);
 
     }
 
@@ -287,7 +291,6 @@ class Room {
         valve.add(ring, bar, bar2, sphere);
         return valve;
     }
-
 
     #makeStaircase() {
         // Create a group to hold all parts of the staircase
