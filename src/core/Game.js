@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import InputHandler from '../utils/InputHandler.js';
 import Platformer from '../levels/platformer/Platformer.js';
+import Scene from '../levels/escaperoom/Scene.js';
 import Test from '../levels/test.js';
 
 class Game {
@@ -18,7 +19,7 @@ class Game {
 
         this.levelIndex = 0;
         // Create new levels
-        this.levels = [new Platformer(this.inputHandler), new Test()];
+        this.levels = [new Platformer(this.inputHandler), new Scene(this.renderer), new Test()];
         // Switch/start with level 0 
         this.switchLevel(0);
         // Clock for deltaTime
@@ -48,7 +49,7 @@ class Game {
         console.log(`Scene setup completed for level ${index}`);
         
         // Add orbit controls for debugging
-        if (this.activeLevel.camera) {
+        if (this.activeLevel.camera ) {
             this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
             this.controls.update();
         }
