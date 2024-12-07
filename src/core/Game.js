@@ -19,7 +19,7 @@ class Game {
 
         this.levelIndex = 0;
         // Create new levels
-        this.levels = [new Scene(this.renderer), new Platformer(this.inputHandler)];
+        this.levels = [new Platformer(this.inputHandler), new Scene(this.renderer), new Test()];
         // Switch/start with level 0 
         this.switchLevel(0);
         // Clock for deltaTime
@@ -49,7 +49,7 @@ class Game {
         console.log(`Scene setup completed for level ${index}`);
         
         // Add orbit controls for debugging
-        if (this.activeLevel.camera) {
+        if (this.activeLevel.camera ) {
             this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
             this.controls.update();
         }

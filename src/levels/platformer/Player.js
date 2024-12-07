@@ -10,9 +10,9 @@ class Player {
 
         this.size = new THREE.Vector3(5, 10, 5);
         this.position = new THREE.Vector3(35, 5, 20.5);
-        this.speed = 10;
+        this.speed = 17;
 
-        this.maxSpeed = 10;
+        this.maxSpeed = 17;
         this.maxJumps = 2;
         this.jumpCount = 0;
         

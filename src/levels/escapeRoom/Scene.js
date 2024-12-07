@@ -58,6 +58,8 @@ class Scene {
         this.scene = null;
         this.camera = null;
         this.clock = null;
+        this.player.controls.unlock();
+        this.player.controls = null;
         this.player = null;
 
 
