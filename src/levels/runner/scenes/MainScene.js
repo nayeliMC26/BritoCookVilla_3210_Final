@@ -10,6 +10,8 @@ import { AmbientLight, DirectionalLight, DirectionalLightHelper } from "three";
 
 class MainScene {
     constructor(renderer) {
+        this.lastTime = performance.now(); // Initialize lastTime for deltaTime calculation
+
         // Initialize core elements
         this.container = document.getElementById("canvas");
         this.renderer = renderer;
@@ -17,6 +19,10 @@ class MainScene {
         this.scene = new THREE.Scene();
         this.player = new Player();
         this.buildings = new Buildings();
+
+        // Set up event listeners and other initializations
+        this.lastJumpState = false;
+        this.lastSlideState = false;
 
         // Add lighting
         this.ambientLight = new AmbientLight(0xffffff, 0.5);
@@ -40,7 +46,7 @@ class MainScene {
     init() {
         // This is the method that gets called when the level is activated
         console.log("Initializing MainScene...");
-        
+
         // Put your setup logic here (e.g., set initial player position, etc.)
         this.started = false;
     }
@@ -56,23 +62,24 @@ class MainScene {
         // this.configureDistortion();
     }
 
-    configureDistortion() {
-        const horizontalFOV = 140;
-        const strength = 0.3;
-        const cylindricalRatio = 2;
+    // No longer in use
+    // configureDistortion() {
+    //     const horizontalFOV = 140;
+    //     const strength = 0.3;
+    //     const cylindricalRatio = 2;
 
-        const height =
-            Math.tan(THREE.MathUtils.degToRad(horizontalFOV) / 2) /
-            this.camera.aspect;
+    //     const height =
+    //         Math.tan(THREE.MathUtils.degToRad(horizontalFOV) / 2) /
+    //         this.camera.aspect;
 
-        this.camera.fov = (Math.atan(height) * 2 * 180) / Math.PI;
-        this.camera.updateProjectionMatrix();
+    //     this.camera.fov = (Math.atan(height) * 2 * 180) / Math.PI;
+    //     this.camera.updateProjectionMatrix();
 
-        this.effect.uniforms["strength"].value = strength;
-        this.effect.uniforms["height"].value = height;
-        this.effect.uniforms["aspectRatio"].value = this.camera.aspect;
-        this.effect.uniforms["cylindricalRatio"].value = cylindricalRatio;
-    }
+    //     this.effect.uniforms["strength"].value = strength;
+    //     this.effect.uniforms["height"].value = height;
+    //     this.effect.uniforms["aspectRatio"].value = this.camera.aspect;
+    //     this.effect.uniforms["cylindricalRatio"].value = cylindricalRatio;
+    // }
 
     addEventListeners() {
         window.addEventListener("resize", this.handleResize.bind(this));
@@ -84,8 +91,13 @@ class MainScene {
     }
 
     animate() {
+        // Calculate deltaTime
+        const now = performance.now();
+        const deltaTime = (now - this.lastTime) / 1000; // Time in seconds
+        this.lastTime = now;
+    
         // Update and render the scene
-        this.update();
+        this.update(deltaTime);
         this.composer.render(); // Ensure post-processing is done here
         this.render(); // Explicitly call render if needed
     
@@ -93,10 +105,16 @@ class MainScene {
         requestAnimationFrame(this.animate.bind(this)); // Continuously call animate
     }
 
-    update() {
+    update(deltaTime) {
         if (this.started) {
             this.player.update();
             this.buildings.update();
+
+            const isJumping = this.player.isJumping;
+            const isSliding = this.player.isSliding;
+
+            // Update camera with player's current actions
+            this.camera.update(deltaTime, isJumping, isSliding);
 
             // Check collisions
             console.log(this.buildings.checkCollisions(this.player));
