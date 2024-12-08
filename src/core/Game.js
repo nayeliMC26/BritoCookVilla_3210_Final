@@ -4,6 +4,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import InputHandler from '../utils/InputHandler.js';
 import Platformer from '../levels/platformer/Platformer.js';
 import EscapeRoom from '../levels/escapeRoom/Scene.js';
+import Runner from '../levels/runner/scenes/MainScene.js';
 import Test from '../levels/test.js';
 
 class Game {
@@ -19,7 +20,7 @@ class Game {
 
         this.levelIndex = 0;
         // Create new levels
-        this.levels = [new EscapeRoom(this.renderer), new Platformer(this.inputHandler), new Test()];
+        this.levels = [new EscapeRoom(this.renderer), new Platformer(this.inputHandler), new Runner(this.renderer)];
         // Switch/start with level 0 
         this.switchLevel(0);
         // Clock for deltaTime
