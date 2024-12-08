@@ -14,14 +14,16 @@ class Player {
         this.moveForward, this.moveBackward, this.moveLeft, this.moveRight;
         // Directions
         this.moveDirection, this.forward, this.right, this.up;
+        // Binded event listener functions
+        this.bindedKeydown, this.bindedKeyup, this.bindedClick;
 
         // this.createFlashlight();
-        this.#initPlayer();
+        this.#init();
         this.#addCrosshair();
-        this.keyboardControls();
+        this.#addEventListener();
     }
 
-    #initPlayer() {
+    #init() {
         // Set the initial position of the camera (spawn location)
         this.camera.position.set(230, 65, 170);
         this.camera.lookAt(this.camera.position);
@@ -37,6 +39,7 @@ class Player {
 
         // Pointer lock controls for FPS-style movement
         this.controls = new PointerLockControls(this.camera, document.body);
+        console.log(this.controls)
 
         // Flags for directional movement
         this.moveForward = false;
@@ -52,12 +55,18 @@ class Player {
         // Counter for bobbing effect
         this.bobCounter = 0;
 
+        // Binding the event listener functions to this document
+        this.bindedKeydown = this.#keydown.bind(this);
+        this.bindedKeyup = this.#keyup.bind(this);
+        this.bindedClick = this.#click.bind(this);
+
         // Enable or disable debug mode for the player
         this.debugMode = false;
         this.cameraOffset = new THREE.Vector3(0, 20, -30);
     }
 
     update(deltaTime) {
+        // console.log(this.controls)
         const velocity = this.speed * deltaTime;
         this.moveDirection.set(0, 0, 0);
 
@@ -112,6 +121,7 @@ class Player {
     #addCrosshair() {
         // Create a div for the crosshair
         var crosshair = document.createElement("div");
+        crosshair.id = "crosshair";
         crosshair.style.position = "absolute";
         crosshair.style.top = "50%";
         crosshair.style.left = "50%";
@@ -125,108 +135,67 @@ class Player {
         document.body.appendChild(crosshair);
     }
 
-    requestPointerLock() {
+    #requestPointerLock() {
         this.controls.lock();
     }
 
-    onPointerLockChange() {
-        this.mouseLookEnabled = document.pointerLockElement === document.body;
+
+    test() {
+        console.log("test")
     }
 
-    keyboardControls() {
-        document.addEventListener("keydown", (event) => {
-            if (!this.controls.isLocked) return;
-            switch (event.key) {
-                case "w":
-                    this.moveForward = true;
-                    break;
-                case "s":
-                    this.moveBackward = true;
-                    break;
-                case "a":
-                    this.moveLeft = true;
-                    break;
-                case "d":
-                    this.moveRight = true;
-                    break;
-            }
-        });
-
-        document.addEventListener("keyup", (event) => {
-            if (!this.controls.isLocked) return;
-            switch (event.key) {
-                case "w":
-                    this.moveForward = false;
-                    break;
-                case "s":
-                    this.moveBackward = false;
-                    break;
-                case "a":
-                    this.moveLeft = false;
-                    break;
-                case "d":
-                    this.moveRight = false;
-                    break;
-            }
-        });
-
-        document.body.addEventListener("click", () => {
-            if (!this.mouseLookEnabled) {
-                this.requestPointerLock();
-            }
-        });
-
-        document.addEventListener(
-            "pointerlockchange",
-            this.onPointerLockChange.bind(this)
-        );
+    #addEventListener() {
+        document.addEventListener("keydown", this.bindedKeydown);
+        document.addEventListener("keyup", this.bindedKeyup);
+        document.addEventListener("click", this.bindedClick);
     }
 
-    createFlashlight() {
-        var flashlightMesh = new THREE.Group();
-        this.flashlightMesh = flashlightMesh;
-        var flashlightBodyGeometry = new THREE.BoxGeometry(1.5, 4, 1.5);
-        var flashlightHeadGeometry = new THREE.BoxGeometry(2, 1, 2);
-        var flashlightMaterial = new THREE.MeshPhongMaterial({
-            color: 0x404040,
-        });
+    removeEventListener() {
+        document.removeEventListener("keydown", this.bindedKeydown);
+        document.removeEventListener("keyup", this.bindedKeyup);
+        document.removeEventListener("click", this.bindedClick);
+    }
 
-        var flashlightHead = new THREE.Mesh(
-            flashlightHeadGeometry,
-            flashlightMaterial
-        );
-        flashlightHead.position.set(5, -3, -7);
-        flashlightHead.rotation.set(0, Math.PI / 2, Math.PI / 2);
-
-        var flashlightBody = new THREE.Mesh(
-            flashlightBodyGeometry,
-            flashlightMaterial
-        );
-        flashlightBody.position.set(5, -3, -5);
-        flashlightBody.rotation.set(0, Math.PI / 2, Math.PI / 2);
-
-        flashlightMesh.add(flashlightHead);
-        flashlightMesh.add(flashlightBody);
-        this.camera.add(flashlightMesh);
-
-        this.illumination = new THREE.SpotLight(
-            0xfff4bd,
-            10000,
-            1000,
-            Math.PI / 6,
-            0.5,
-            2
-        );
-        this.camera.add(this.illumination);
-        this.camera.add(this.illumination.target);
-        this.illumination.position.set(0, 0, 0);
-        this.illumination.target.position.set(0, 0, -1);
-
-        this.illumination.visible = false;
-        for (var mesh of this.camera.children) {
-            mesh.visible = false;
+    #keydown(event) {
+        if (!this.controls.isLocked) return;
+        switch (event.key) {
+            case "w":
+                this.moveForward = true;
+                break;
+            case "s":
+                this.moveBackward = true;
+                break;
+            case "a":
+                this.moveLeft = true;
+                break;
+            case "d":
+                this.moveRight = true;
+                break;
         }
     }
+
+    #keyup(event) {
+        if (!this.controls.isLocked) return;
+        switch (event.key) {
+            case "w":
+                this.moveForward = false;
+                break;
+            case "s":
+                this.moveBackward = false;
+                break;
+            case "a":
+                this.moveLeft = false;
+                break;
+            case "d":
+                this.moveRight = false;
+                break;
+        }
+    }
+
+    #click() {
+        if (!this.controls.isLocked) this.controls.lock();
+    }
+
 }
 
 export default Player;

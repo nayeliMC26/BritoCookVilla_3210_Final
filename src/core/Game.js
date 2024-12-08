@@ -1,105 +1,104 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
 import InputHandler from '../utils/InputHandler.js';
-import Player from '../entities/Player.js';
-import Platform from '../entities/Platform.js';
-import PhysicsEngine from '../utils/PhysicsEngine.js';
+import Platformer from '../levels/platformer/Platformer.js';
+import EscapeRoom from '../levels/escapeRoom/Scene.js';
+import Test from '../levels/test.js';
 
 class Game {
     constructor(renderer) {
         // Renderer will be passed in from main
         this.renderer = renderer;
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        // Temporary for debugging
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.stats = new Stats();
+        document.body.appendChild(this.stats.dom);
 
         // Create an inputHandler instance
         this.inputHandler = new InputHandler();
         this.inputHandler.keyboardControls();
 
-        // Create a new physics engine instance
-        this.physicsEngine = new PhysicsEngine();
-
-        // three body problem ??? ez !
-
-        // Create player and add to the physics engine
-        this.player = new Player(this.scene, this.inputHandler, this.physicsEngine);
-
-        // Create some platforms and addthem  to the physics engine
-        this.platform = new Platform(this.scene, 0, 0, 0, 30, 1, 20, this.physicsEngine);
-
-        this.platform2 = new Platform(this.scene, 40, 2, 0, 20, 1, 20, this.physicsEngine)
-
-        this.physicsEngine.addObject(this.player.physicsObject);
-        this.physicsEngine.addObject(this.platform.physicsObject);
-        this.physicsEngine.addObject(this.platform2.physicsObject)
-
+        this.levelIndex = 0;
+        // Create new levels
+        this.levels = [new EscapeRoom(this.renderer), new Platformer(this.inputHandler), new Test()];
+        // Switch/start with level 0 
+        this.switchLevel(0);
+        // Clock for deltaTime
         this.clock = new THREE.Clock();
     }
 
-    // Set up the scene (camera, lights, etc.)
-    sceneSetup() {
-        // Set the camera position
-        this.camera.position.set(0, 10, 50);
-        this.camera.lookAt(new THREE.Vector3(0, 5, 0));
-
-        // Add ambient lighting to the scene
-        var ambientLight = new THREE.AmbientLight(0x404040, 1);
-        this.scene.add(ambientLight);
-
-        // Add a directional light
-        var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(10, 30, 10);
-        this.scene.add(directionalLight);
-
-        // Optionally, add a grid helper to visualize the ground
-        var gridHelper = new THREE.GridHelper(100, 20);
-        this.scene.add(gridHelper);
-    }
-
-    // Initialize any asynchronous tasks 
-    async init() {
-        try {
-            console.log('Initializing game...');
-
-            // Initialize the scene (camera, lighting, etc.)
-            this.sceneSetup();
-
-            console.log('Game initialized successfully');
-        } catch (error) {
-            console.error('Error during game initialization:', error);
+    /**
+     * A function to switch levels based on its index 
+     * @param {*} index 
+     */
+    switchLevel(index) {
+        // If there is an active level, clear it first
+        /* Note as of now I don't have a way of switching back without resetting up the scene */
+        if (this.activeLevel) {
+            console.log(`Clearing active level ${this.levelIndex}`);
+            this.activeLevel.clear();
         }
+
+        // Set the active level again
+        this.activeLevel = this.levels[index];
+        this.levelIndex = index;
+
+        console.log(`Switched to level ${index}`);
+
+        // Call init to initialize the new level
+        this.activeLevel.init();
+        console.log(`Scene setup completed for level ${index}`);
+
+        // Add orbit controls for debugging
+        // if (this.activeLevel.camera) {
+            // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
+            // this.controls.update();
+        // }
     }
 
     update(deltaTime) {
-        // Update the player and other game logic
-        this.player.update(deltaTime, this.physicsEngine.objects);
-    }
 
+        // Handle level switching
+        if (this.inputHandler.key1 && this.levelIndex !== 0) {
+            console.log('Switching to level 0');
+            this.switchLevel(0);
+        } else if (this.inputHandler.key2 && this.levelIndex !== 1) {
+            console.log('Switching to level 1');
+            this.switchLevel(1);
+        } else if (this.inputHandler.key3 && this.levelIndex !== 2 && this.levels[2]) {
+            console.log('Switching to level 2');
+            this.switchLevel(2);
+        }
+
+        if (this.activeLevel) {
+            this.activeLevel.update(deltaTime);
+        }
+    }
 
     start() {
         var gameLoop = () => {
+            this.stats.update();
             var deltaTime = this.clock.getDelta();
 
-            // Update the physics engine and game state
-            this.physicsEngine.update(deltaTime);
+            // Update active level
             this.update(deltaTime);
 
-            // Render the scene
-            this.renderer.render(this.scene, this.camera);
+            // Render active level scene
+            if (this.activeLevel) {
+                this.renderer.render(this.activeLevel.scene, this.activeLevel.camera);
+            }
 
             // Request the next frame
             requestAnimationFrame(gameLoop);
         };
-
         // Start the game loop
-        requestAnimationFrame(gameLoop);
+        gameLoop();
     }
 
     onResize(width, height) {
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
+        if (this.activeLevel) {
+            this.activeLevel.camera.aspect = width / height;
+            this.activeLevel.camera.updateProjectionMatrix();
+        }
         this.renderer.setSize(width, height);
     }
 }
