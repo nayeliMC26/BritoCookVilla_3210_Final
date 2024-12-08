@@ -5,7 +5,7 @@ class Player {
     constructor(scene, camera, playArea, objectArea) {
         this.scene = scene;
         this.camera = camera;
-        // Bouunding boxes tha tmake up the room
+        // Bounding boxes that make up the room
         this.playArea = playArea;
         this.objectArea = objectArea;
         // Player parameters
@@ -17,7 +17,6 @@ class Player {
         // Binded event listener functions
         this.bindedKeydown, this.bindedKeyup, this.bindedClick;
 
-        // this.createFlashlight();
         this.#init();
         this.#addCrosshair();
         this.#addEventListener();
@@ -39,7 +38,6 @@ class Player {
 
         // Pointer lock controls for FPS-style movement
         this.controls = new PointerLockControls(this.camera, document.body);
-        console.log(this.controls)
 
         // Flags for directional movement
         this.moveForward = false;
@@ -65,45 +63,6 @@ class Player {
         this.cameraOffset = new THREE.Vector3(0, 20, -30);
     }
 
-    update(deltaTime) {
-        // console.log(this.controls)
-        const velocity = this.speed * deltaTime;
-        this.moveDirection.set(0, 0, 0);
-
-        this.camera.getWorldDirection(this.forward); // Forward direction
-        this.forward.y = 0; // Prevent flying up or down
-
-        this.right.crossVectors(this.forward, this.up)
-
-        // Checking which dirrections the player wants to move
-        if (this.moveForward) {
-            this.moveDirection.add(this.forward);
-        }
-        if (this.moveBackward) {
-            this.moveDirection.sub(this.forward);
-        }
-        if (this.moveLeft) {
-            this.moveDirection.sub(this.right);
-        }
-        if (this.moveRight) {
-            this.moveDirection.add(this.right);
-        }
-
-        // Apply velocity to move dirrection
-        this.moveDirection.normalize().multiplyScalar(velocity)
-
-        // 
-        this.#handleAreaCollision();
-
-
-        // If moving in any direction
-        if (this.moveForward || this.moveBackward || this.moveLeft || this.moveRight) {
-            this.bobCounter += 10 * deltaTime;
-            this.bobCounter %= Math.PI * 2; // Mod to not increase indefenetely 
-            this.camera.position.y += Math.sin(this.bobCounter) / 16
-        }
-    }
-
     #handleAreaCollision() {
         // Getting where the player woudl be if they moved
         this.nextPos.add(this.moveDirection);
@@ -120,7 +79,7 @@ class Player {
 
     #addCrosshair() {
         // Create a div for the crosshair
-        var crosshair = document.createElement("div");
+        const crosshair = document.createElement("div");
         crosshair.id = "crosshair";
         crosshair.style.position = "absolute";
         crosshair.style.top = "50%";
@@ -135,13 +94,9 @@ class Player {
         document.body.appendChild(crosshair);
     }
 
-    #requestPointerLock() {
-        this.controls.lock();
-    }
-
-
-    test() {
-        console.log("test")
+    #removeCrosshair(){
+        const crosshair = document.getElementById('crosshair');
+        document.body.removeChild(crosshair);
     }
 
     #addEventListener() {
@@ -150,7 +105,7 @@ class Player {
         document.addEventListener("click", this.bindedClick);
     }
 
-    removeEventListener() {
+    #removeEventListener() {
         document.removeEventListener("keydown", this.bindedKeydown);
         document.removeEventListener("keyup", this.bindedKeyup);
         document.removeEventListener("click", this.bindedClick);
@@ -194,6 +149,53 @@ class Player {
 
     #click() {
         if (!this.controls.isLocked) this.controls.lock();
+    }
+
+    update(deltaTime) {
+        // console.log(this.controls)
+        const velocity = this.speed * deltaTime;
+        this.moveDirection.set(0, 0, 0);
+
+        this.camera.getWorldDirection(this.forward); // Forward direction
+        this.forward.y = 0; // Prevent flying up or down
+
+        this.right.crossVectors(this.forward, this.up)
+
+        // Checking which dirrections the player wants to move
+        if (this.moveForward) {
+            this.moveDirection.add(this.forward);
+        }
+        if (this.moveBackward) {
+            this.moveDirection.sub(this.forward);
+        }
+        if (this.moveLeft) {
+            this.moveDirection.sub(this.right);
+        }
+        if (this.moveRight) {
+            this.moveDirection.add(this.right);
+        }
+
+        // Apply velocity to move dirrection
+        this.moveDirection.normalize().multiplyScalar(velocity)
+
+        this.#handleAreaCollision();
+
+        // If moving in any direction
+        if (this.moveForward || this.moveBackward || this.moveLeft || this.moveRight) {
+            this.bobCounter += 10 * deltaTime;
+            this.bobCounter %= Math.PI * 2; // Mod to not increase indefenetely 
+            this.camera.position.y += Math.sin(this.bobCounter) / 16
+        }
+    }
+    
+    /**
+     * Removes controls, user interactions, and crosshair
+     */
+    clear(){
+        this.controls.unlock();
+        this.controls.dispose();
+        this.#removeEventListener();
+        this.#removeCrosshair();
     }
 
 }

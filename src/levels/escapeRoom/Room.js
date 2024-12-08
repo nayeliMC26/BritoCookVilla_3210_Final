@@ -335,11 +335,8 @@ class Room {
         // Add the cone shell to the group
         light.add(shell);
 
-        // Add a point light to the group if the "light" parameter is not false
-        if (light != false) {
-            const pointLight = new THREE.PointLight(0xff0000, 1, 100);
-            light.add(pointLight);
-        }
+        const pointLight = new THREE.PointLight(0xff0000, 1, 100);
+        light.add(pointLight);
 
         return light;
     }
