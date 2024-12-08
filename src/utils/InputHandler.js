@@ -7,6 +7,11 @@ class InputHandler {
         this.jump = false;
         this.isJumping = false;
 
+        // Level switching keys
+        this.key1 = false;
+        this.key2 = false;
+        this.key3 = false;
+
         this.keyboardControls();
     }
 
@@ -27,16 +32,24 @@ class InputHandler {
                     this.moveRight = true;
                     break;
                 case "Space":
-                    if (!this.isJumping) {
-                        this.jump = true; 
-                        this.isJumping = true; 
-                    }
+                    this.jump = true;
+                    break;
+
+                // Level switching keys
+                case "Digit1":
+                    this.key1 = true;
+                    break;
+                case "Digit2":
+                    this.key2 = true;
+                    break;
+                case "Digit3":
+                    this.key3 = true;
                     break;
             }
         });
 
         document.addEventListener("keyup", (event) => {
-            console.log(`Key Up: ${event.code}`);
+            // DEBUG: console.log(`Key Up: ${event.code}`);
             switch (event.code) {
                 case "KeyW":
                     this.moveForward = false;
@@ -51,8 +64,17 @@ class InputHandler {
                     this.moveRight = false;
                     break;
                 case "Space":
-                    this.jump = false; 
-                    this.isJumping = false; 
+                    this.jump = false;
+                    break;
+
+                case "Digit1":
+                    this.key1 = false;
+                    break;
+                case "Digit2":
+                    this.key2 = false;
+                    break;
+                case "Digit3":
+                    this.key3 = false;
                     break;
             }
         });
