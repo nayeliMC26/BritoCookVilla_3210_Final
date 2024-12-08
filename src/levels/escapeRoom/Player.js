@@ -58,22 +58,22 @@ class Player {
         this.bindedKeyup = this.#keyup.bind(this);
         this.bindedClick = this.#click.bind(this);
 
-        // Enable or disable debug mode for the player
-        this.debugMode = false;
-        this.cameraOffset = new THREE.Vector3(0, 20, -30);
     }
 
     #handleAreaCollision() {
-        // Getting where the player woudl be if they moved
+        // Get the player's potential next position based on movement
         this.nextPos.add(this.moveDirection);
-        // Cheking to see if that next position is out of bounds
-        const outsideArea = this.playArea.every((box) => box.containsPoint(this.nextPos) === false)
-        const inObject = this.objectArea.some((box) => box.containsPoint(this.nextPos) === true)
-        // If player is inside the bounds 
+
+        // Check if the next position is outside the bounds or intersects with objects
+        const outsideArea = this.playArea.every((box) => box.containsPoint(this.nextPos) === false);
+        const inObject = this.objectArea.some((box) => box.containsPoint(this.nextPos) === true);
+
+        // If the player is inside the bounds and not colliding with objects, move them
         if (!outsideArea && !inObject) {
             this.camera.position.add(this.moveDirection);
         }
-        // Set next position to the current position
+
+        // Reset the next position to the current position
         this.nextPos.copy(this.camera.position);
     }
 
@@ -94,8 +94,8 @@ class Player {
         document.body.appendChild(crosshair);
     }
 
-    #removeCrosshair(){
-        const crosshair = document.getElementById('crosshair');
+    #removeCrosshair() {
+        const crosshair = document.getElementById("crosshair");
         document.body.removeChild(crosshair);
     }
 
@@ -130,7 +130,7 @@ class Player {
     }
 
     #keyup(event) {
-        if (!this.controls.isLocked) return;
+        if (!this.controls.isLocked) return; 
         switch (event.key) {
             case "w":
                 this.moveForward = false;
@@ -148,20 +148,21 @@ class Player {
     }
 
     #click() {
-        if (!this.controls.isLocked) this.controls.lock();
+        if (!this.controls.isLocked) this.controls.lock(); 
     }
 
     update(deltaTime) {
-        // console.log(this.controls)
         const velocity = this.speed * deltaTime;
         this.moveDirection.set(0, 0, 0);
 
+        // Determine the player's movement direction
         this.camera.getWorldDirection(this.forward); // Forward direction
-        this.forward.y = 0; // Prevent flying up or down
+        // Prevent vertical movement
+        this.forward.y = 0; 
 
-        this.right.crossVectors(this.forward, this.up)
+        this.right.crossVectors(this.forward, this.up);
 
-        // Checking which dirrections the player wants to move
+        // Add movement based on input
         if (this.moveForward) {
             this.moveDirection.add(this.forward);
         }
@@ -175,29 +176,28 @@ class Player {
             this.moveDirection.add(this.right);
         }
 
-        // Apply velocity to move dirrection
-        this.moveDirection.normalize().multiplyScalar(velocity)
+        // Apply velocity to the movement direction
+        this.moveDirection.normalize().multiplyScalar(velocity);
 
         this.#handleAreaCollision();
 
-        // If moving in any direction
+        // Add bobbing effect while moving
         if (this.moveForward || this.moveBackward || this.moveLeft || this.moveRight) {
             this.bobCounter += 10 * deltaTime;
-            this.bobCounter %= Math.PI * 2; // Mod to not increase indefenetely 
-            this.camera.position.y += Math.sin(this.bobCounter) / 16
+            this.bobCounter %= Math.PI * 2; // Keep bobCounter within one full cycle
+            this.camera.position.y += Math.sin(this.bobCounter) / 16; // Bobbing effect
         }
     }
-    
+
     /**
      * Removes controls, user interactions, and crosshair
      */
-    clear(){
+    clear() {
         this.controls.unlock();
         this.controls.dispose();
         this.#removeEventListener();
         this.#removeCrosshair();
     }
-
 }
 
 export default Player;
