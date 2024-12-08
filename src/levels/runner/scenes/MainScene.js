@@ -12,13 +12,9 @@ class MainScene {
     constructor(renderer) {
         // Initialize core elements
         this.container = document.getElementById("canvas");
-        this.renderer = renderer
-        // this.container.appendChild(this.renderer.domElement);
-
+        this.renderer = renderer;
         this.camera = new Camera();
         this.scene = new THREE.Scene();
-
-        // Add objects
         this.player = new Player();
         this.buildings = new Buildings();
 
@@ -37,9 +33,16 @@ class MainScene {
         // Initialize post-processing
         this.setupComposer();
 
-        // Event handlers and animation loop
-        this.addEventListeners();
-        this.animate();
+        this.started = false;
+    }
+
+    // Define init method for setup logic
+    init() {
+        // This is the method that gets called when the level is activated
+        console.log("Initializing MainScene...");
+        
+        // Put your setup logic here (e.g., set initial player position, etc.)
+        this.started = false;
     }
 
     setupComposer() {
@@ -59,7 +62,8 @@ class MainScene {
         const cylindricalRatio = 2;
 
         const height =
-            Math.tan(THREE.MathUtils.degToRad(horizontalFOV) / 2) / this.camera.aspect;
+            Math.tan(THREE.MathUtils.degToRad(horizontalFOV) / 2) /
+            this.camera.aspect;
 
         this.camera.fov = (Math.atan(height) * 2 * 180) / Math.PI;
         this.camera.updateProjectionMatrix();
@@ -82,20 +86,26 @@ class MainScene {
     animate() {
         // Update and render the scene
         this.update();
-        this.composer.render();
-
-        // Apply simple distortion directly on the camera
-        // this.camera.applyDistortion(this.renderer.renderer);
-
-        requestAnimationFrame(this.animate.bind(this));
+        this.composer.render(); // Ensure post-processing is done here
+        this.render(); // Explicitly call render if needed
+    
+        // Continue the animation loop
+        requestAnimationFrame(this.animate.bind(this)); // Continuously call animate
     }
 
     update() {
-        this.player.update();
-        this.buildings.update();
+        if (this.started) {
+            this.player.update();
+            this.buildings.update();
 
-        // Check collisions
-        console.log(this.buildings.checkCollisions(this.player));
+            // Check collisions
+            console.log(this.buildings.checkCollisions(this.player));
+        }
+    }
+
+    start() {
+        console.log("Starting the Runner game...");
+        this.started = true;
     }
 
     render() {

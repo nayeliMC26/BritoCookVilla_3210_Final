@@ -1,11 +1,11 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-import InputHandler from '../utils/InputHandler.js';
-import Platformer from '../levels/platformer/Platformer.js';
-import EscapeRoom from '../levels/escapeRoom/Scene.js';
-import Runner from '../levels/runner/scenes/MainScene.js';
-import Test from '../levels/test.js';
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import Stats from "three/examples/jsm/libs/stats.module.js";
+import InputHandler from "../utils/InputHandler.js";
+import Platformer from "../levels/platformer/Platformer.js";
+import EscapeRoom from "../levels/escapeRoom/Scene.js";
+import Runner from "../levels/runner/scenes/MainScene.js";
+import Test from "../levels/test.js";
 
 class Game {
     constructor(renderer) {
@@ -20,16 +20,20 @@ class Game {
 
         this.levelIndex = 0;
         // Create new levels
-        this.levels = [new EscapeRoom(this.renderer), new Platformer(this.inputHandler), new Runner(this.renderer)];
-        // Switch/start with level 0 
+        this.levels = [
+            new EscapeRoom(this.renderer),
+            new Platformer(this.inputHandler),
+            new Runner(this.renderer),
+        ];
+        // Switch/start with level 0
         this.switchLevel(0);
         // Clock for deltaTime
         this.clock = new THREE.Clock();
     }
 
     /**
-     * A function to switch levels based on its index 
-     * @param {*} index 
+     * A function to switch levels based on its index
+     * @param {*} index
      */
     switchLevel(index) {
         // If there is an active level, clear it first
@@ -49,24 +53,32 @@ class Game {
         this.activeLevel.init();
         console.log(`Scene setup completed for level ${index}`);
 
+        // If the new level is the Runner level, start its movement
+        if (this.activeLevel instanceof Runner) {
+            this.activeLevel.start(); // Start the Runner game when it becomes active
+        }
+
         // Add orbit controls for debugging
         // if (this.activeLevel.camera) {
-            // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
-            // this.controls.update();
+        // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
+        // this.controls.update();
         // }
     }
 
     update(deltaTime) {
-
         // Handle level switching
         if (this.inputHandler.key1 && this.levelIndex !== 0) {
-            console.log('Switching to level 0');
+            console.log("Switching to level 0");
             this.switchLevel(0);
         } else if (this.inputHandler.key2 && this.levelIndex !== 1) {
-            console.log('Switching to level 1');
+            console.log("Switching to level 1");
             this.switchLevel(1);
-        } else if (this.inputHandler.key3 && this.levelIndex !== 2 && this.levels[2]) {
-            console.log('Switching to level 2');
+        } else if (
+            this.inputHandler.key3 &&
+            this.levelIndex !== 2 &&
+            this.levels[2]
+        ) {
+            console.log("Switching to level 2");
             this.switchLevel(2);
         }
 
@@ -85,7 +97,10 @@ class Game {
 
             // Render active level scene
             if (this.activeLevel) {
-                this.renderer.render(this.activeLevel.scene, this.activeLevel.camera);
+                this.renderer.render(
+                    this.activeLevel.scene,
+                    this.activeLevel.camera
+                );
             }
 
             // Request the next frame
