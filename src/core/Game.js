@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import InputHandler from '../utils/InputHandler.js';
 import Platformer from '../levels/platformer/Platformer.js';
-import Scene from '../levels/escaperoom/Scene.js';
+import EscapeRoom from '../levels/escapeRoom/Scene.js';
 import Test from '../levels/test.js';
 
 class Game {
@@ -19,7 +19,7 @@ class Game {
 
         this.levelIndex = 0;
         // Create new levels
-        this.levels = [new Platformer(this.inputHandler), new Scene(this.renderer), new Test()];
+        this.levels = [new EscapeRoom(this.renderer), new Platformer(this.inputHandler), new Test()];
         // Switch/start with level 0 
         this.switchLevel(0);
         // Clock for deltaTime
@@ -37,22 +37,22 @@ class Game {
             console.log(`Clearing active level ${this.levelIndex}`);
             this.activeLevel.clear();
         }
-    
+
         // Set the active level again
         this.activeLevel = this.levels[index];
         this.levelIndex = index;
-    
+
         console.log(`Switched to level ${index}`);
-        
+
         // Call init to initialize the new level
         this.activeLevel.init();
         console.log(`Scene setup completed for level ${index}`);
-        
+
         // Add orbit controls for debugging
-        if (this.activeLevel.camera ) {
-            this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
-            this.controls.update();
-        }
+        // if (this.activeLevel.camera) {
+            // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
+            // this.controls.update();
+        // }
     }
 
     update(deltaTime) {

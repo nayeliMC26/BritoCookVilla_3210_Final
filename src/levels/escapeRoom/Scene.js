@@ -14,7 +14,7 @@ class Scene {
 
     }
 
-    init(){
+    init() {
         this.room = new Room(this.scene);
         this.player = new Player(this.scene, this.camera, this.room.areaBB, this.room.objectsBB);
         this.raycaster = new Raycaster(this.scene, this.camera, this.player.controls, this.room.interactiveOb);
@@ -32,7 +32,7 @@ class Scene {
     }
 
     render(time, deltaTime) {
-        this.animate(time, deltaTime);
+        this.update(time, deltaTime);
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -59,13 +59,16 @@ class Scene {
             this.scene.remove(child);
         }
 
+        this.player.controls.unlock();
+        this.player.removeEventListener();
+
         // Nullify references to prevent memory leaks
         this.scene = null;
         this.camera = null;
         this.clock = null;
-        this.player.controls.unlock();
         this.player.controls = null;
         this.player = null;
+
 
 
         console.log('Scene cleared.');
