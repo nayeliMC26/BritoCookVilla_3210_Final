@@ -117,7 +117,7 @@ class Raycaster {
      * @param {number} deltaTime - Time since the last frame
      */
     update(deltaTime) {
-        if (!this.controls.isLocked) return; // Skip if controls are not locked
+        // Checking which valve to animate
         for (let i = 0; i < this.animationState.length; i++) {
             this.rotation[i] = deltaTime;
             if (this.animationState[i]) {
