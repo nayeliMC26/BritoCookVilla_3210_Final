@@ -196,7 +196,6 @@ class Raycaster {
      */
     #toggleValve(stateIndex) {
         this.states[stateIndex] = !this.states[stateIndex];
-        console.log(this.states[stateIndex])
         this.animationState[stateIndex - 4] = true;
     }
 
@@ -220,6 +219,7 @@ class Raycaster {
         });
 
         document.addEventListener('mousemove', () => {
+            if (!this.controls.isLocked) return;
             this.camera.getWorldDirection(this.direction);
             this.raycaster.set(this.camera.position, this.direction);
             this.intersections = this.raycaster.intersectObjects(this.objects.slice(0, 8));

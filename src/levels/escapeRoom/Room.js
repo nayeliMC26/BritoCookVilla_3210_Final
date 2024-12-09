@@ -105,6 +105,8 @@ class Room {
         this.table = new THREE.Mesh(geometry, material);
         this.table.rotateY(-Math.PI / 2);
         this.table.position.set(287.5, 15, 60);
+        this.table.castShadow = true;
+        this.table.receiveShadow = true;
         this.scene.add(this.table);
 
         // Letter setup
@@ -115,6 +117,8 @@ class Room {
         this.letter.rotateZ(-Math.PI / 2);
         this.letter.position.copy(this.table.position);
         this.letter.position.y += 16.01;
+        this.letter.castShadow = true;
+        this.letter.receiveShadow = true;
         this.scene.add(this.letter);
 
         // Alphabet setup
@@ -123,6 +127,8 @@ class Room {
         this.alphabet = new THREE.Mesh(geometry, material);
         this.alphabet.rotateY(-Math.PI / 2);
         this.alphabet.position.set(299.9, 65, 60);
+        this.alphabet.castShadow = true;
+        this.alphabet.receiveShadow = true;
         this.scene.add(this.alphabet);
 
         // Buttons set up
@@ -132,21 +138,29 @@ class Room {
         material = new THREE.MeshStandardMaterial({ color: 0x500000 });
         this.buttons[0] = new THREE.Mesh(geometry, material);
         this.buttons[0].position.set(230, 55, 2.5);
+        this.buttons[0].castShadow = true;
+        this.buttons[0].receiveShadow = true;
         // Button 2 (left)
         material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
         this.buttons[1] = new THREE.Mesh(geometry, material);
         this.buttons[1].position.copy(this.buttons[0].position);
         this.buttons[1].position.x += -28;
+        this.buttons[1].castShadow = true;
+        this.buttons[1].receiveShadow = true;
         // Button 3 (right)
         material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
         this.buttons[2] = new THREE.Mesh(geometry, material);
         this.buttons[2].position.copy(this.buttons[0].position);
         this.buttons[2].position.x += 28;
+        this.buttons[2].castShadow = true;
+        this.buttons[2].receiveShadow = true;
         // Button 4 (Exit)
         material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
         this.buttons[3] = new THREE.Mesh(geometry, material);
         this.buttons[3].rotateY(Math.PI / 2);
         this.buttons[3].position.set(2.5, 55, 200);
+        this.buttons[3].castShadow = true;
+        this.buttons[3].receiveShadow = true;
         this.buttons.forEach((button) => this.interactiveOb.push(button));
         this.scene.add(...this.buttons);
 
@@ -157,22 +171,31 @@ class Room {
         // Middle 
         this.pipes[0] = new THREE.Mesh(geometry, material);
         this.pipes[0].position.set(160, 50, 60);
+        this.pipes[0].castShadow = true;
+        this.pipes[0].receiveShadow = true;
         // Left
         this.pipes[1] = this.pipes[0].clone();
         this.pipes[1].position.z += 30;
+        this.pipes[1].castShadow = true;
+        this.pipes[1].receiveShadow = true;
         // Right
         this.pipes[2] = this.pipes[0].clone();
         this.pipes[2].position.z += -30;
+        this.pipes[2].castShadow = true;
+        this.pipes[2].receiveShadow = true;
         this.scene.add(...this.pipes);
 
         // Valves setup
         this.valves = []
+        // Middle
         this.valves[0] = this.#makeValve();
         this.valves[0].rotateY(Math.PI / 2);
         this.valves[0].position.set(170.1, 50, 60);
+        // Left
         this.valves[1] = this.#makeValve();
         this.valves[1].rotateY(Math.PI / 2);
         this.valves[1].position.set(170.1, 50, 90);
+        // Right
         this.valves[2] = this.#makeValve();
         this.valves[2].rotateY(Math.PI / 2);
         this.valves[2].position.set(170.1, 50, 30);
@@ -275,21 +298,29 @@ class Room {
         var geometry = new THREE.TorusGeometry(10, 2, 16, 100);
         var material = new THREE.MeshStandardMaterial({ color: 0x555555 });
         var ring = new THREE.Mesh(geometry, material);
+        ring.castShadow = true;
+        ring.receiveShadow = true;
 
         // Create the first bar 
         geometry = new THREE.CylinderGeometry(2, 2, 16, 32);
         var bar = new THREE.Mesh(geometry, material);
         bar.rotateZ(Math.PI / 4);
+        bar.castShadow = true;
+        bar.receiveShadow = true;
 
         // Create the second bar 
         var bar2 = new THREE.Mesh(geometry, material.clone());
         bar2.material.color.set(0xff00ff);
         bar2.rotateZ(-Math.PI / 4);
+        bar2.castShadow = true;
+        bar2.receiveShadow = true;
 
         // Create a small black sphere for the center of the valve
         geometry = new THREE.SphereGeometry(3, 32);
         var sphere = new THREE.Mesh(geometry, material.clone());
         sphere.material.color.set(0x000000);
+        sphere.castShadow = true;
+        sphere.receiveShadow = true;
 
         valve.add(ring, bar, bar2, sphere);
         return valve;
@@ -304,8 +335,12 @@ class Room {
         var material = new THREE.MeshStandardMaterial({ color: 0x777777 });
         var leftHandrail = new THREE.Mesh(geometry, material);
         leftHandrail.position.x += -15;
+        // leftHandrail.castShadow = true;
+        // leftHandrail.receiveShadow = true;
         var rightHandrail = leftHandrail.clone();
         rightHandrail.position.x += 30;
+        // rightHandrail.castShadow = true;
+        // rightHandrail.receiveShadow = true;
 
         // Initialize an array to hold the steps
         var steps = [];
@@ -315,11 +350,15 @@ class Room {
         steps[0] = new THREE.Mesh(geometry, material);
         steps[0].rotateZ(Math.PI / 2);
         steps[0].position.y += -30;
+        steps[0].castShadow = true;
+        steps[0].receiveShadow = true;
 
         // Create additional steps by cloning the first step
         for (let i = 1; i < 4; i++) {
             steps[i] = steps[0].clone();
             steps[i].position.y += i * 20;
+            steps[i].castShadow = true;
+            steps[i].receiveShadow = true;
         }
 
         staircase.add(leftHandrail, rightHandrail, ...steps);
