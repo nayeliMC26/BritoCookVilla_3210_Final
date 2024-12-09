@@ -2,12 +2,14 @@ import * as THREE from 'three';
 import Room from './Room';
 import Player from './Player';
 import Raycaster from './Raycaster';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 class Scene {
     constructor(renderer) {
         this.renderer = renderer;
         this.scene;
         this.camera;
+        this.ambientLight;
     }
 
     init() {
@@ -20,6 +22,9 @@ class Scene {
         // Position the camera at a specific spawn location
         this.camera.position.set(230, 65, 170);
 
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
+        this.scene.add(this.ambientLight);
+
         // Create the room object and add it to the scene
         this.room = new Room(this.scene);
 
@@ -28,6 +33,8 @@ class Scene {
 
         // Create the raycaster to handle object interaction
         this.raycaster = new Raycaster(this.scene, this.camera, this.player.controls, this.room.interactiveOb);
+
+        // const controls = new OrbitControls( this.camera, this.renderer.domElement );
     }
 
     update(deltaTime) {
