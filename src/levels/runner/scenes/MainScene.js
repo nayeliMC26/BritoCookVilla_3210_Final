@@ -6,7 +6,12 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import Camera from "../core/Camera.js";
 import Player from "../objects/Player.js";
 import Buildings from "../objects/Buildings.js";
-import { AmbientLight, DirectionalLight, DirectionalLightHelper } from "three";
+import {
+    AmbientLight,
+    DirectionalLight,
+    DirectionalLightHelper,
+    RectAreaLight,
+} from "three";
 
 class MainScene {
     constructor(renderer) {
@@ -24,15 +29,29 @@ class MainScene {
         this.lastJumpState = false;
         this.lastSlideState = false;
 
-        // Add lighting
-        this.ambientLight = new AmbientLight(0xffffff, 0.5);
-        this.directionalLight = new DirectionalLight(0xffffff, 1);
-        this.directionalLight.position.set(5, 10, 7.5);
-        this.lightHelper = new DirectionalLightHelper(this.directionalLight, 5);
+        this.ambientLight = new AmbientLight(0x404040, 0.5); // Existing ambient light
 
+        // Create front RectAreaLight
+        this.rectAreaLightFront = new RectAreaLight(0x0000ff, 2, 10, 10); // (color, intensity, width, height)
+        this.rectAreaLightFront.position.set(10, 10, 15);
+        this.rectAreaLightFront.lookAt(0, 0, 0); // Make it face the scene's center
+
+        // Create rear RectAreaLight
+        this.rectAreaLightRear = new RectAreaLight(0xff0000, 2, 10, 10); // (color, intensity, width, height)
+        this.rectAreaLightRear.position.set(-10, 10, 15);
+        this.rectAreaLightRear.lookAt(0, 0, 0); // Make it face the scene's center
+
+        // Create moonlight
+        this.moonLight = new DirectionalLight(0xfcfcd7, 0.5); // Soft blue moonlight (color, intensity)
+        this.moonLight.position.set(50, 100, 30); // Position high above and angled
+        this.moonLightHelper = new DirectionalLightHelper(this.moonLight, 5);
+
+        // Add lights and helpers to the scene
         this.scene.add(this.ambientLight);
-        this.scene.add(this.directionalLight);
-        this.scene.add(this.lightHelper);
+        this.scene.add(this.rectAreaLightFront);
+        this.scene.add(this.rectAreaLightRear);
+        this.scene.add(this.moonLight);
+        this.scene.add(this.moonLightHelper);
         this.scene.add(this.player);
         this.scene.add(this.buildings);
 
@@ -54,32 +73,7 @@ class MainScene {
     setupComposer() {
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(new RenderPass(this.scene, this.camera));
-
-        // this.effect = new ShaderPass(DistortionShader());
-        // this.composer.addPass(this.effect);
-        // this.effect.renderToScreen = true;
-
-        // this.configureDistortion();
     }
-
-    // No longer in use
-    // configureDistortion() {
-    //     const horizontalFOV = 140;
-    //     const strength = 0.3;
-    //     const cylindricalRatio = 2;
-
-    //     const height =
-    //         Math.tan(THREE.MathUtils.degToRad(horizontalFOV) / 2) /
-    //         this.camera.aspect;
-
-    //     this.camera.fov = (Math.atan(height) * 2 * 180) / Math.PI;
-    //     this.camera.updateProjectionMatrix();
-
-    //     this.effect.uniforms["strength"].value = strength;
-    //     this.effect.uniforms["height"].value = height;
-    //     this.effect.uniforms["aspectRatio"].value = this.camera.aspect;
-    //     this.effect.uniforms["cylindricalRatio"].value = cylindricalRatio;
-    // }
 
     addEventListeners() {
         window.addEventListener("resize", this.handleResize.bind(this));
@@ -95,12 +89,12 @@ class MainScene {
         const now = performance.now();
         const deltaTime = (now - this.lastTime) / 1000; // Time in seconds
         this.lastTime = now;
-    
+
         // Update and render the scene
         this.update(deltaTime);
         this.composer.render(); // Ensure post-processing is done here
         this.render(); // Explicitly call render if needed
-    
+
         // Continue the animation loop
         requestAnimationFrame(this.animate.bind(this)); // Continuously call animate
     }

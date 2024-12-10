@@ -2,9 +2,8 @@ import {
     Group,
     TextureLoader,
     MeshStandardMaterial,
-    Box3,
-    Vector3,
-    Color,
+    CylinderGeometry,
+    Mesh,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
@@ -20,65 +19,61 @@ class Buildings extends Group {
 
         // Load the roughness map
         const roughnessMap = this.textureLoader.load(
-            "../public/textures/roughnessMap.jpg"
+            "../public/textures/gr1_roughnessmap.jpg"
         );
 
         // Preload the ground model
         this.loader.load("../public/models/block1.glb", (gltf) => {
             const groundModel = gltf.scene;
 
-            // Apply roughness to the ground model
+            // Apply roughness and puddle maps to the ground model
             groundModel.traverse((child) => {
                 if (child.isMesh && child.material) {
                     const existingMaterial = child.material;
 
                     child.material = new MeshStandardMaterial({
-                        map: existingMaterial.map,
-                        color: existingMaterial.color,
-                        roughness: 1.0,
-                        roughnessMap: roughnessMap,
-                        normalMap: existingMaterial.normalMap,
-                        metalness: existingMaterial.metalness,
-                        metalnessMap: existingMaterial.metalnessMap,
+                        map: existingMaterial.map, // Base color map
+                        color: existingMaterial.color, // Base color
+                        roughness: 1.0, // Roughness for base
+                        roughnessMap: roughnessMap, // Add roughness map
                     });
                 }
             });
 
-            // Load both window collections
+            // Preload walls and ground into the pool
             this.loader.load(
                 "../public/models/windowCollection1.glb",
                 (wallGltf1) => {
                     const wallModel1 = wallGltf1.scene;
-                    this.applyEmissiveMaterial(wallModel1); // Apply emissive material
+                    this.applyEmissiveMaterial(wallModel1);
 
                     this.loader.load(
                         "../public/models/windowCollection2.glb",
                         (wallGltf2) => {
                             const wallModel2 = wallGltf2.scene;
-                            this.applyEmissiveMaterial(wallModel2); // Apply emissive material
+                            this.applyEmissiveMaterial(wallModel2);
 
-                            // Preload the combined ground and wall into the pool
-                            for (let i = 0; i < 3; i++) {
+                            for (let i = 0; i < 10; i++) {
                                 const groundClone = groundModel.clone();
-                                groundClone.scale.set(10, 1, 7); // Adjust scale for ground
+                                groundClone.scale.set(10, 1, 7);
                                 groundClone.position.set(i * 10, 0, 0);
 
-                                // Randomly pick between wallModel1 and wallModel2
+                                // Add puddles to the ground
+                                this.addPuddles(groundClone);
+
                                 const wallClone =
                                     Math.random() > 0.5
                                         ? wallModel1.clone()
                                         : wallModel2.clone();
-                                wallClone.scale.set(0.49, 3, 1); // Adjust scale for walls
-                                wallClone.position.set(0, -4, -0.4); // Position walls relative to the ground
+                                wallClone.scale.set(0.49, 3, 1);
+                                wallClone.position.set(0, -4, -0.4);
 
-                                // Add walls as a child of the ground clone
                                 groundClone.add(wallClone);
 
                                 this.pool.push(groundClone);
                             }
 
-                            // Initialize active buildings
-                            for (let i = 0; i < 3; i++) {
+                            for (let i = 0; i < 10; i++) {
                                 this.addBuilding();
                             }
                         }
@@ -88,21 +83,48 @@ class Buildings extends Group {
         });
     }
 
+    addPuddles(groundModel) {
+        const puddleMaterial = new MeshStandardMaterial({
+            color: 0xffffff, // Slightly blue tint for the water
+            metalness: 0.9, // High reflectivity
+            roughness: 0.0, // Very smooth surface
+            transparent: true, // Allow slight transparency
+            opacity: 0.2, // Slightly transparent
+        });
+
+        const puddleCount = 10; // Number of puddles to create
+        const groundBounds = { x: 34, z: 0.5 }; // Adjust based on ground size
+
+        for (let i = 0; i < puddleCount; i++) {
+            const radius = Math.random() * 0.1 + 0.1; // Random radius between 0.5 and 1.0
+            const puddleGeometry = new CylinderGeometry(
+                radius,
+                radius,
+                0.01,
+                32
+            ); // Thin cylinder
+            const puddle = new Mesh(puddleGeometry, puddleMaterial);
+
+            // Randomize puddle position
+            puddle.position.set(
+                Math.random() * groundBounds.x - groundBounds.x / 10,
+                0.01, // Slightly above ground level to avoid z-fighting
+                Math.random() * groundBounds.z - groundBounds.z / 2
+            );
+
+            groundModel.add(puddle);
+        }
+    }
+
     // Apply emissive material to the walls
     applyEmissiveMaterial(wallModel) {
         wallModel.traverse((child) => {
             if (child.isMesh && child.material) {
                 const existingMaterial = child.material;
 
-                // Create a material with emissive properties
                 child.material = new MeshStandardMaterial({
                     map: existingMaterial.map, // Base texture
                     color: existingMaterial.color, // Base color
-                    emissive: new Color(0xffffff), // White emission
-                    emissiveIntensity: 1, // Adjust brightness
-                    emissiveMap: existingMaterial.map, // Use the same texture for emission
-                    roughness: existingMaterial.roughness,
-                    metalness: existingMaterial.metalness,
                 });
             }
         });
@@ -119,54 +141,15 @@ class Buildings extends Group {
     }
 
     update() {
-        const resetPositionX = this.activeBuildings.length * 34 / 2; // Position where buildings should reset
+        const resetPositionX = (this.activeBuildings.length * 34) / 2;
 
-        // Move all active buildings
-        this.activeBuildings.forEach((building, index) => {
+        this.activeBuildings.forEach((building) => {
             building.position.x -= 0.1;
 
-            // If the building goes past the left side of the screen, reset it to the right
             if (building.position.x < -resetPositionX) {
-                // Reset the position of the building based on the index, but add a constant offset to make it move offscreen
                 building.position.x = resetPositionX;
             }
         });
-    }
-
-    checkCollisions(player) {
-        // Create a bounding box for the player
-        const playerBox = new Box3().setFromObject(player);
-
-        for (const box of this.collisionBoxes) {
-            if (box.intersectsBox(playerBox)) {
-                // Find the direction of the collision
-                const cubeCenter = new Vector3();
-                const playerCenter = new Vector3();
-                box.getCenter(cubeCenter);
-                playerBox.getCenter(playerCenter);
-
-                // Determine relative position
-                const relativePosition = cubeCenter.sub(playerCenter);
-
-                if (
-                    Math.abs(relativePosition.x) > Math.abs(relativePosition.z)
-                ) {
-                    if (relativePosition.x > 0) {
-                        return "right"; // Cube is to the player's right
-                    } else {
-                        return "left"; // Cube is to the player's left
-                    }
-                } else {
-                    if (relativePosition.z > 0) {
-                        return "front"; // Cube is in front of the player
-                    } else {
-                        return "back"; // Cube is behind the player
-                    }
-                }
-            }
-        }
-
-        return null; // No collision detected
     }
 }
 

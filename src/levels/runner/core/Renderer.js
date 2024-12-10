@@ -6,6 +6,8 @@ class Renderer {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setClearColor(0x000000);
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0; // Adjust the exposure to make sure the image is not too bright
     }
 
     get domElement() {
