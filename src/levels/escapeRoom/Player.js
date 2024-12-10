@@ -5,7 +5,7 @@ class Player {
     constructor(scene, camera, playArea, objectArea) {
         this.scene = scene;
         this.camera = camera;
-        // Bouunding boxes tha tmake up the room
+        // Bounding boxes that make up the room
         this.playArea = playArea;
         this.objectArea = objectArea;
         // Player parameters
@@ -14,14 +14,15 @@ class Player {
         this.moveForward, this.moveBackward, this.moveLeft, this.moveRight;
         // Directions
         this.moveDirection, this.forward, this.right, this.up;
+        // Binded event listener functions
+        this.bindedKeydown, this.bindedKeyup, this.bindedClick;
 
-        // this.createFlashlight();
-        this.#initPlayer();
-        //this.#addCrosshair();
-        this.keyboardControls();
+        this.#init();
+        this.#addCrosshair();
+        this.#addEventListener();
     }
 
-    #initPlayer() {
+    #init() {
         // Set the initial position of the camera (spawn location)
         this.camera.position.set(230, 65, 170);
         this.camera.lookAt(this.camera.position);
@@ -52,66 +53,34 @@ class Player {
         // Counter for bobbing effect
         this.bobCounter = 0;
 
-        // Enable or disable debug mode for the player
-        this.debugMode = false;
-        this.cameraOffset = new THREE.Vector3(0, 20, -30);
-    }
+        // Binding the event listener functions to this document
+        this.bindedKeydown = this.#keydown.bind(this);
+        this.bindedKeyup = this.#keyup.bind(this);
+        this.bindedClick = this.#click.bind(this);
 
-    update(deltaTime) {
-        const velocity = this.speed * deltaTime;
-        this.moveDirection.set(0, 0, 0);
-
-        this.camera.getWorldDirection(this.forward); // Forward direction
-        this.forward.y = 0; // Prevent flying up or down
-
-        this.right.crossVectors(this.forward, this.up)
-
-        // Checking which dirrections the player wants to move
-        if (this.moveForward) {
-            this.moveDirection.add(this.forward);
-        }
-        if (this.moveBackward) {
-            this.moveDirection.sub(this.forward);
-        }
-        if (this.moveLeft) {
-            this.moveDirection.sub(this.right);
-        }
-        if (this.moveRight) {
-            this.moveDirection.add(this.right);
-        }
-
-        // Apply velocity to move dirrection
-        this.moveDirection.multiplyScalar(velocity);
-
-        // 
-        this.#handleAreaCollision();
-
-
-        // If moving in any direction
-        if (this.moveForward || this.moveBackward || this.moveLeft || this.moveRight) {
-            this.bobCounter += 10 * deltaTime;
-            this.bobCounter %= Math.PI * 2; // Mod to not increase indefenetely 
-            this.camera.position.y += Math.sin(this.bobCounter) / 16
-        }
     }
 
     #handleAreaCollision() {
-        // Getting where the player woudl be if they moved
+        // Get the player's potential next position based on movement
         this.nextPos.add(this.moveDirection);
-        // Cheking to see if that next position is out of bounds
-        const outsideArea = this.playArea.every((box) => box.containsPoint(this.nextPos) === false)
-        const inObject = this.objectArea.some((box) => box.containsPoint(this.nextPos) === true)
-        // If player is inside the bounds 
+
+        // Check if the next position is outside the bounds or intersects with objects
+        const outsideArea = this.playArea.every((box) => box.containsPoint(this.nextPos) === false);
+        const inObject = this.objectArea.some((box) => box.containsPoint(this.nextPos) === true);
+
+        // If the player is inside the bounds and not colliding with objects, move them
         if (!outsideArea && !inObject) {
             this.camera.position.add(this.moveDirection);
         }
-        // Set next position to the current position
+
+        // Reset the next position to the current position
         this.nextPos.copy(this.camera.position);
     }
 
     #addCrosshair() {
         // Create a div for the crosshair
-        var crosshair = document.createElement("div");
+        const crosshair = document.createElement("div");
+        crosshair.id = "crosshair";
         crosshair.style.position = "absolute";
         crosshair.style.top = "50%";
         crosshair.style.left = "50%";
@@ -125,105 +94,109 @@ class Player {
         document.body.appendChild(crosshair);
     }
 
-    requestPointerLock() {
-        this.controls.lock();
+    #removeCrosshair() {
+        const crosshair = document.getElementById("crosshair");
+        document.body.removeChild(crosshair);
     }
 
-    onPointerLockChange() {
-        this.mouseLookEnabled = document.pointerLockElement === document.body;
+    #addEventListener() {
+        document.addEventListener("keydown", this.bindedKeydown);
+        document.addEventListener("keyup", this.bindedKeyup);
+        document.addEventListener("click", this.bindedClick);
     }
 
-    keyboardControls() {
-        document.addEventListener("keydown", (event) => {
-            switch (event.key) {
-                case "w":
-                    this.moveForward = true;
-                    break;
-                case "s":
-                    this.moveBackward = true;
-                    break;
-                case "a":
-                    this.moveLeft = true;
-                    break;
-                case "d":
-                    this.moveRight = true;
-                    break;
-            }
-        });
-
-        document.addEventListener("keyup", (event) => {
-            switch (event.key) {
-                case "w":
-                    this.moveForward = false;
-                    break;
-                case "s":
-                    this.moveBackward = false;
-                    break;
-                case "a":
-                    this.moveLeft = false;
-                    break;
-                case "d":
-                    this.moveRight = false;
-                    break;
-            }
-        });
-
-        document.body.addEventListener("click", () => {
-            if (!this.mouseLookEnabled) {
-                this.requestPointerLock();
-            }
-        });
-
-        document.addEventListener(
-            "pointerlockchange",
-            this.onPointerLockChange.bind(this)
-        );
+    #removeEventListener() {
+        document.removeEventListener("keydown", this.bindedKeydown);
+        document.removeEventListener("keyup", this.bindedKeyup);
+        document.removeEventListener("click", this.bindedClick);
     }
 
-    createFlashlight() {
-        var flashlightMesh = new THREE.Group();
-        this.flashlightMesh = flashlightMesh;
-        var flashlightBodyGeometry = new THREE.BoxGeometry(1.5, 4, 1.5);
-        var flashlightHeadGeometry = new THREE.BoxGeometry(2, 1, 2);
-        var flashlightMaterial = new THREE.MeshPhongMaterial({
-            color: 0x404040,
-        });
-
-        var flashlightHead = new THREE.Mesh(
-            flashlightHeadGeometry,
-            flashlightMaterial
-        );
-        flashlightHead.position.set(5, -3, -7);
-        flashlightHead.rotation.set(0, Math.PI / 2, Math.PI / 2);
-
-        var flashlightBody = new THREE.Mesh(
-            flashlightBodyGeometry,
-            flashlightMaterial
-        );
-        flashlightBody.position.set(5, -3, -5);
-        flashlightBody.rotation.set(0, Math.PI / 2, Math.PI / 2);
-
-        flashlightMesh.add(flashlightHead);
-        flashlightMesh.add(flashlightBody);
-        this.camera.add(flashlightMesh);
-
-        this.illumination = new THREE.SpotLight(
-            0xfff4bd,
-            10000,
-            1000,
-            Math.PI / 6,
-            0.5,
-            2
-        );
-        this.camera.add(this.illumination);
-        this.camera.add(this.illumination.target);
-        this.illumination.position.set(0, 0, 0);
-        this.illumination.target.position.set(0, 0, -1);
-
-        this.illumination.visible = false;
-        for (var mesh of this.camera.children) {
-            mesh.visible = false;
+    #keydown(event) {
+        if (!this.controls.isLocked) return;
+        switch (event.key) {
+            case "w":
+                this.moveForward = true;
+                break;
+            case "s":
+                this.moveBackward = true;
+                break;
+            case "a":
+                this.moveLeft = true;
+                break;
+            case "d":
+                this.moveRight = true;
+                break;
         }
+    }
+
+    #keyup(event) {
+        if (!this.controls.isLocked) return; 
+        switch (event.key) {
+            case "w":
+                this.moveForward = false;
+                break;
+            case "s":
+                this.moveBackward = false;
+                break;
+            case "a":
+                this.moveLeft = false;
+                break;
+            case "d":
+                this.moveRight = false;
+                break;
+        }
+    }
+
+    #click() {
+        if (!this.controls.isLocked) this.controls.lock(); 
+    }
+
+    update(deltaTime) {
+        const velocity = this.speed * deltaTime;
+        this.moveDirection.set(0, 0, 0);
+
+        // Determine the player's movement direction
+        this.camera.getWorldDirection(this.forward); // Forward direction
+        // Prevent vertical movement
+        this.forward.y = 0; 
+
+        this.right.crossVectors(this.forward, this.up);
+
+        // Add movement based on input
+        if (this.moveForward) {
+            this.moveDirection.add(this.forward);
+        }
+        if (this.moveBackward) {
+            this.moveDirection.sub(this.forward);
+        }
+        if (this.moveLeft) {
+            this.moveDirection.sub(this.right);
+        }
+        if (this.moveRight) {
+            this.moveDirection.add(this.right);
+        }
+
+        // Apply velocity to the movement direction
+        this.moveDirection.normalize().multiplyScalar(velocity);
+
+        this.#handleAreaCollision();
+
+        // Add bobbing effect while moving
+        if (this.moveForward || this.moveBackward || this.moveLeft || this.moveRight) {
+            this.bobCounter += 10 * deltaTime;
+            this.bobCounter %= Math.PI * 2; // Keep bobCounter within one full cycle
+            this.camera.position.y += Math.sin(this.bobCounter) / 16; // Bobbing effect
+        }
+    }
+
+    /**
+     * Removes controls, user interactions, and crosshair
+     */
+    clear() {
+        this.controls.unlock();
+        this.controls.dispose();
+        this.#removeEventListener();
+        this.#removeCrosshair();
     }
 }
 
