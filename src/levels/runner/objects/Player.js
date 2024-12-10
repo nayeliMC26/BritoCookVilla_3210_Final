@@ -37,6 +37,17 @@ class Player extends THREE.Group {
             "textures/animationframes/normal_jump_frame2.PNG"
         );
 
+        // Slide frames
+        this.slideFrame = this.textureLoader.load(
+            "textures/animationframes/slide_frame.PNG"
+        );
+        this.metalSlideFrame = this.textureLoader.load(
+            "textures/animationframes/metal_slide_frame.PNG"
+        );
+        this.normalSlideFrame = this.textureLoader.load(
+            "textures/animationframes/normal_slide_frame.PNG"
+        );
+
         // Load the textures for running animation
         let loadedTextures = 0;
         const totalFrames = 10; // Adjust the number of frames accordingly
@@ -124,18 +135,22 @@ class Player extends THREE.Group {
                 this.playJumpAnimation(); // Trigger jump animation
             }
 
-            if (event.key === "s") {
+            if (event.key === "s" && !this.isSliding) {
                 this.isSliding = true;
-                this.playerMesh.scale.set(1.25, 0.5, 1); // Flatten the player for sliding
-                this.targetY = 1; // Lower Y position when sliding
+                this.playSlideAnimation(); // Trigger slide animation
+                this.targetY = 2; // Lower Y position when sliding
             }
         });
 
         window.addEventListener("keyup", (event) => {
             if (event.key === "s") {
-                this.isSliding = false;
-                this.playerMesh.scale.set(1, 1, 1); // Reset scale after sliding
+                this.isSliding = false; // Reset sliding state
                 this.targetY = 2; // Restore Y position after sliding
+
+                // Return to running animation if not jumping
+                if (!this.isJumping) {
+                    this.startAnimation();
+                }
             }
         });
     }
@@ -154,6 +169,18 @@ class Player extends THREE.Group {
             this.material.normalMap = this.normalJumpFrame2;
             this.material.needsUpdate = true;
         }, 100);
+    }
+
+    // Add the playSlideAnimation method
+    playSlideAnimation() {
+        // Switch to the slide frame
+        this.material.map = this.slideFrame;
+        this.material.metalnessMap = this.metalSlideFrame;
+        this.material.normalMap = this.normalSlideFrame;
+        this.material.needsUpdate = true;
+
+        // The slide animation remains until the "s" key is released,
+        // so no automatic return to running animation here.
     }
 
     startAnimation() {
@@ -189,16 +216,20 @@ class Player extends THREE.Group {
 
                 if (!this.isSliding) {
                     this.playerMesh.scale.set(1, 1, 1); // Reset scale
+                    // Return to running animation
+                    this.startAnimation();
                 }
-
-                // Return to running animation
-                this.startAnimation();
             }
         }
 
         // Smoothly move to target Y position for sliding
         if (!this.isJumping && this.position.y !== this.targetY) {
             this.position.y += (this.targetY - this.position.y) * 0.1; // Smooth transition
+        }
+
+        // Ensure slide animation persists while sliding
+        if (this.isSliding) {
+            this.playSlideAnimation(); // Keep the slide animation active
         }
     }
 }
