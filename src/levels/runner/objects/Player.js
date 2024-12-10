@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 class Player extends THREE.Group {
     constructor() {
@@ -7,59 +7,67 @@ class Player extends THREE.Group {
         // Create a texture loader to load PNG images
         this.textureLoader = new THREE.TextureLoader();
 
-        // Arrays to hold the textures and normal maps for the animation
+        // Arrays to hold the textures and normal maps
         this.textures = [];
         this.normalMaps = [];
+        this.metalnessMaps = [];  // Array for metalness maps
         this.currentFrame = 0;
 
-        // Load the textures and normal maps (assuming PNG images are named as 'frame1.png', 'frame2.png', ..., 'frameN.png')
+        // Load the textures (assuming PNG images are named as 'frame1.png', 'frame2.png', ..., 'frameN.png')
         let loadedTextures = 0;
         const totalFrames = 10; // Adjust the number of frames accordingly
 
         for (let i = 1; i <= totalFrames; i++) {
-            // Load textures
+            // Load the base texture (for diffuse)
             const texture = this.textureLoader.load(
                 `textures/animationframes/frame${i}.PNG`,
                 () => {
                     loadedTextures++;
                     if (loadedTextures === totalFrames) {
-                        this.startAnimation(); // Start animation after all textures and normal maps are loaded
+                        this.startAnimation(); // Start animation after all textures are loaded
                     }
                 },
                 undefined, // Progress callback (optional)
                 (err) => {
-                    console.error(
-                        `Error loading texture: textures/animationframes/frame${i}.PNG`
-                    );
+                    console.error(`Error loading texture: textures/animationframes/frame${i}.PNG`);
                 }
             );
             texture.encoding = THREE.LinearEncoding;
             this.textures.push(texture);
 
-            // Load normal maps
+            // Load normal maps (assuming they're named normal_frame1.png, normal_frame2.png, ...)
             const normalMap = this.textureLoader.load(
                 `textures/animationframes/normal_frame${i}.PNG`,
-                undefined, // Success callback (optional)
-                undefined, // Progress callback (optional)
-                (err) => {
-                    console.error(
-                        `Error loading normal map: textures/animationframes/normal_frame${i}.PNG`
-                    );
-                }
+                () => {
+                    loadedTextures++;
+                },
+                undefined,
+                (err) => console.error(`Error loading normal map: normal_frame${i}.PNG`)
             );
             normalMap.encoding = THREE.LinearEncoding;
             this.normalMaps.push(normalMap);
+
+            // Load metalness maps (assuming they're named metal_frame1.png, metal_frame2.png, ...)
+            const metalnessMap = this.textureLoader.load(
+                `textures/animationframes/metal_frame${i}.PNG`,
+                () => {
+                    loadedTextures++;
+                },
+                undefined,
+                (err) => console.error(`Error loading metalness map: metal_frame${i}.PNG`)
+            );
+            metalnessMap.encoding = THREE.LinearEncoding;
+            this.metalnessMaps.push(metalnessMap);
         }
 
         // Create the material with the first frame texture
         this.material = new THREE.MeshStandardMaterial({
             map: this.textures[0], // Set the first frame as the initial texture
-            normalMap: this.normalMaps[0], // Set the first normal map as the initial normal map
+            normalMap: this.normalMaps[0], // Set the first normal map
+            metalnessMap: this.metalnessMaps[0], // Set the first metalness map
             transparent: true,
-            roughness: 0.5,
-            metalness: 0.1,
-            depthWrite: true,
-            depthTest: true,
+            roughness: 0.7,
+            metalness: 0.6,
         });
 
         // Create the geometry for the player
@@ -67,9 +75,6 @@ class Player extends THREE.Group {
 
         // Create the mesh for the player
         this.playerMesh = new THREE.Mesh(geometry, this.material);
-        this.playerMesh.castShadow = true; // Enable the player to cast shadows
-        this.playerMesh.receiveShadow = true; // Enable the player to receive shadows
-
         this.add(this.playerMesh);
 
         // Set the initial position for the player
@@ -115,14 +120,15 @@ class Player extends THREE.Group {
     }
 
     startAnimation() {
-        // Update the texture and normal map every 1/12th of a second
+        // Update the texture and normal/metalness maps every 1/12th of a second
         setInterval(() => {
             // Update the current frame
             this.currentFrame = (this.currentFrame + 1) % this.textures.length; // Loop back to the first frame after the last one
 
-            // Update the material's texture and normal map
+            // Update the material's textures and maps
             this.material.map = this.textures[this.currentFrame];
             this.material.normalMap = this.normalMaps[this.currentFrame];
+            this.material.metalnessMap = this.metalnessMaps[this.currentFrame];
 
             this.material.needsUpdate = true; // Ensure material is updated
         }, 1000 / 12); // 12 frames per second
