@@ -184,7 +184,7 @@ class Platformer {
 
     addBoxes() {
         var positions = [
-            { x: 225, y: 5, z: 10, width: 15, height: 15, depth: 10 },
+            { x: 225, y: 5, z: 10, width: 15, height: 15, depth: 15 },
             { x: 240, y: 10, z: 10, width: 15, height: 25, depth: 15 },
             { x: 420, y: 67.5, z: 10, width: 20, height: 15, depth: 15 },
             { x: 332, y: 25, z: 10, width: 20, height: 50, depth: 15 }
