@@ -3,7 +3,7 @@ import { PerspectiveCamera, MathUtils } from "three";
 class Camera extends PerspectiveCamera {
     constructor() {
         super(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.position.set(0, 5, 15);  // Initial position
+        this.position.set(0, 5, 17);  // Initial position
         this.lookAt(0, 5, 0);
 
         // Wobble settings
@@ -34,7 +34,7 @@ class Camera extends PerspectiveCamera {
         this.position.z = this.initialPosition.z + Math.sin(this.time * this.wobbleSpeed * 0.5) * this.wobbleAmount;
 
         // Log the camera position for debugging
-        console.log(this.position);  // Check position updates
+        // console.log(this.position);  // Check position updates
     }
 
     // Update camera position and rotation based on player's actions

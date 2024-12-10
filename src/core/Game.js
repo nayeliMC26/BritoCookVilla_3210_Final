@@ -5,7 +5,6 @@ import InputHandler from "../utils/InputHandler.js";
 import Platformer from "../levels/platformer/Platformer.js";
 import EscapeRoom from "../levels/escapeRoom/Scene.js";
 import Runner from "../levels/runner/scenes/MainScene.js";
-import Test from "../levels/test.js";
 
 class Game {
     constructor(renderer) {

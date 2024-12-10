@@ -117,7 +117,7 @@ class MainScene {
             this.camera.update(deltaTime, isJumping, isSliding);
 
             // Check collisions
-            console.log(this.buildings.checkCollisions(this.player));
+            // console.log(this.buildings.checkCollisions(this.player));
         }
     }
 
