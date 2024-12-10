@@ -1,16 +1,18 @@
 import * as THREE from 'three';
 import PhysicsEngine from '../../utils/PhysicsEngine.js';
 import Player from '../../levels/platformer/Player.js';
-import Platform from '../../entities/Platform.js';
+import Platform from './entities/Platform.js';
 import PhysicsObject from '../../utils/PhysicsObject.js';
 import AssetLoader from '../../utils/AssetLoader';
 import Spores from './Spores';
+import Mushrooms from './entities/Mushrooms.js';
+import Lever from './entities/Lever.js';
 
 class Platformer {
     constructor(inputHandler) {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
-        this.camera.position.set(0, 10, 50);
+        this.camera.position.set(0, 10, 70);
 
         this.inputHandler = inputHandler;
         this.clock = new THREE.Clock();
@@ -34,14 +36,23 @@ class Platformer {
         this.addRopes();
         this.addBoxes();
         this.addGates();
+        this.addMushrooms();
+        this.addLevers();
 
         this.spores = new Spores(this.scene);
+    }
+
+    addLevers() {
+        this.lever = new Lever(this.inputHandler);
+        this.lever.position.set(425, 67.5, 1)
+        this.scene.add(this.lever)
+        console.log(this.lever)
     }
 
 
 
     addFog() {
-        // this.scene.fog = new THREE.FogExp2(0x000000, 0.005);
+        this.scene.fog = new THREE.FogExp2(0x000000, 0.1);
     }
 
     addGridHelper() {
@@ -53,17 +64,17 @@ class Platformer {
 
     addLights() {
         // Add ambient light
-        var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        var ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
         this.scene.add(ambientLight);
 
         var spotlights = [
-            { x: 350, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 100000, target: { x: 250, y: 0, z: 10 }, withCone: false },
-            { x: 250, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 100000, target: { x: 100, y: 0, z: 10 }, withCone: false },
-            { x: 900, y: 200, z: 30, color: 0x78eeff, angle: Math.PI / 16, intensity: 70000, target: { x: 900, y: 0, z: 30 }, withCone: true },
-            { x: 775, y: 200, z: 30, color: 0x78eeff, angle: Math.PI / 16, intensity: 70000, target: { x: 775, y: 0, z: 30 }, withCone: true },
-            { x: 100, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 7000, target: { x: 100, y: 0, z: 10 }, withCone: false },
-            { x: 300, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 5000, target: { x: 300, y: 0, z: 10 }, withCone: false },
-            { x: 500, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 2000, target: { x: 500, y: 0, z: 10 }, withCone: false }
+            { x: 350, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 20000, target: { x: 250, y: 0, z: 10 }, withCone: false },
+            { x: 250, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 20000, target: { x: 100, y: 0, z: 10 }, withCone: false },
+            { x: 900, y: 200, z: 30, color: 0x78eeff, angle: Math.PI / 16, intensity: 35000, target: { x: 900, y: 0, z: 30 }, withCone: true },
+            { x: 775, y: 200, z: 30, color: 0x78eeff, angle: Math.PI / 16, intensity: 35000, target: { x: 775, y: 0, z: 30 }, withCone: true },
+            { x: 100, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 3500, target: { x: 100, y: 0, z: 10 }, withCone: false },
+            { x: 300, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 2500, target: { x: 300, y: 0, z: 10 }, withCone: false },
+            { x: 500, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 1000, target: { x: 500, y: 0, z: 10 }, withCone: false }
         ];
 
         // Add spotlights to the scene
@@ -96,7 +107,22 @@ class Platformer {
             }
         });
     }
-    
+
+    addMushrooms() {
+        this.mushrooms = [];
+
+        var positions = [
+            { x: 240, y: 30, z: 10 },
+            { x: 350, y: 10, z: 15 },
+            { x: 837.5, y: 40, z: 15 },
+            { x: 1100, y: 65, z: 15 },
+        ];
+
+        positions.forEach((pos) => {
+            var mushroom = new Mushrooms(this.scene, new THREE.Vector3(pos.x, pos.y, pos.z), 2, this.physicsEngine);
+            this.mushrooms.push(mushroom);
+        });
+    }
 
     addGround() {
         var groundGeometry = new THREE.PlaneGeometry(1920, 54);
@@ -108,7 +134,7 @@ class Platformer {
         ground.receiveShadow = true;
 
         this.scene.add(ground);
-        this.physicsEngine.addObject(new PhysicsObject(this.scene, ground, false, 'ground'));
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, ground, false, false, 'ground'));
     }
 
     addOuterWall() {
@@ -120,14 +146,14 @@ class Platformer {
         wall.receiveShadow = true;
 
         this.scene.add(wall);
-        this.physicsEngine.addObject(new PhysicsObject(this.scene, wall, false, 'wall'));
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, wall, false, false, 'innerWall'));
 
         var wall = new THREE.Mesh(wallGeometry, wallMaterial);
         wall.position.set(960, 54, 0);
         wall.receiveShadow = true;
 
         this.scene.add(wall);
-        this.physicsEngine.addObject(new PhysicsObject(this.scene, wall, false, 'wall'));
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, wall, false, false, 'outerWall'));
     }
 
     addCeiling() {
@@ -138,7 +164,7 @@ class Platformer {
         ceiling.position.set(576, 110, 45);
 
         this.scene.add(ceiling);
-        this.physicsEngine.addObject(new PhysicsObject(this.scene, ceiling, false, 'ceiling'));
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, ceiling, false, false, 'ceiling'));
     }
 
     addRopes() {
@@ -171,8 +197,9 @@ class Platformer {
 
             var box = new THREE.Mesh(boxGeometry, boxMaterial);
             box.position.set(pos.x, pos.y, pos.z);
+            box.castShadow = true;
 
-            this.physicsEngine.addObject(new PhysicsObject(this.scene, box, false, 'box'));
+            this.physicsEngine.addObject(new PhysicsObject(this.scene, box, false, false, 'box'));
             this.scene.add(box);
         });
     }
@@ -182,7 +209,8 @@ class Platformer {
             { x: 170, y: 15, z: 10, width: 70, height: 1, depth: 20 },
             { x: 280, y: 35, z: 10, width: 50, height: 1, depth: 20 },
             { x: 400, y: 60, z: 10, width: 90, height: 1, depth: 20 },
-            { x: 535, y: 45, z: 10, width: 110, height: 1, depth: 20 }
+            { x: 535, y: 45, z: 10, width: 110, height: 1, depth: 20 },
+            { x: 837.5, y: 35, z: 10, width: 50, height: 1, depth: 20 }
         ];
 
         positions.forEach((pos) => {
@@ -212,7 +240,7 @@ class Platformer {
             gate.position.set(pos.x, pos.y, pos.z)
             gate.rotation.y = -Math.PI / 2;
             this.scene.add(gate);
-            this.physicsEngine.addObject(new PhysicsObject(this.scene, gate, false, 'gate'));
+            //this.physicsEngine.addObject(new PhysicsObject(this.scene, gate, false, false, 'gate'));
         })
     }
 
@@ -226,7 +254,7 @@ class Platformer {
 
             gateModel.position.set(700, 0, 35);
             gateModel.scale.set(5, 7.6, 4);
-            this.scene.add(gateModel);
+            // this.scene.add(gateModel);
 
 
             wallMesh.receiveShadow = true;
@@ -244,7 +272,7 @@ class Platformer {
                 transparent: true,
             });
 
-            this.createMapPlane(mapMaterial);
+            // this.createMapPlane(mapMaterial);
         } catch (error) {
             console.error('Error loading assets:', error);
         }
@@ -261,7 +289,10 @@ class Platformer {
         this.player.update(deltaTime);
         this.physicsEngine.update(deltaTime);
         this.scene.fog.density = 0.0005 + (this.player.mesh.position.x / 96000);
-        this.updateCamera();
+        // this.updateCamera();
+        if (this.player.mesh.position.x > 415 && this.player.mesh.position.x < 435) {
+            this.lever.update();
+        }
     }
 
     updateCamera() {
