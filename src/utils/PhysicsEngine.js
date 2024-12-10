@@ -62,6 +62,10 @@ class PhysicsEngine {
                 if (object.checkCollision(otherObject)) {
                     // Resolve collision without relying on deltaTime
                     object.resolveCollision(otherObject);
+                    // If the item is collectible and has been collided with, remove its physics object
+                    if(otherObject.isCollectible){
+                        this.removeObject(otherObject)
+                    }
                     otherObject.resolveCollision(object);
                 }
             }

@@ -109,15 +109,18 @@ class Platformer {
     }
 
     addMushrooms() {
-        var collectiblePositions = [
+        this.mushrooms = [];
+
+        var positions = [
             { x: 240, y: 30, z: 10 },
             { x: 350, y: 10, z: 15 },
             { x: 837.5, y: 40, z: 15 },
             { x: 1100, y: 65, z: 15 },
         ];
-    
-        this.collectibles = collectiblePositions.map(pos => {
-            return new Mushrooms(this.scene, new THREE.Vector3(pos.x, pos.y, pos.z), 2, this.physicsEngine);
+
+        positions.forEach((pos) => {
+            var mushroom = new Mushrooms(this.scene, new THREE.Vector3(pos.x, pos.y, pos.z), 2, this.physicsEngine);
+            this.mushrooms.push(mushroom);
         });
     }
 
@@ -161,7 +164,7 @@ class Platformer {
         ceiling.position.set(576, 110, 45);
 
         this.scene.add(ceiling);
-        this.physicsEngine.addObject(new PhysicsObject(this.scene, ceiling, false, 'ceiling'));
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, ceiling, false, false, 'ceiling'));
     }
 
     addRopes() {

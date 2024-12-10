@@ -2,12 +2,13 @@ import * as THREE from 'three';
 /* A class for physics object that can be added to the physics engine */
 class PhysicsObject {
     // Physics objects can be either static or dynamic
-    constructor(scene, mesh, isDynamic = true, isCollectible = false, id = null) {
+    constructor(scene, mesh, isDynamic = false, isCollectible = false, id = null) {
         this.scene = scene;
         this.mesh = mesh;
         this.id = id;
         this.timestep = 1 / 60;
         this.isDynamic = isDynamic;
+        this.isCollected = false;
         this.isCollectible = isCollectible;
         this.velocity = new THREE.Vector3(0, 0, 0); // Velocity for dynamic objects
 
@@ -57,14 +58,6 @@ class PhysicsObject {
     }
 
     resolveCollision(otherObject) {
-
-        if (this.checkCollision(otherObject)) {
-            if (otherObject.isCollectible == true) {
-                this.collectObject(otherObject);
-                console.log("collect me!")
-
-            }
-        }
         if (this.checkCollision(otherObject)) {
             if (this.isDynamic && !otherObject.isDynamic) {
                 // Calculate the differences in positions along each axis
@@ -109,6 +102,9 @@ class PhysicsObject {
                     this.velocity.z = 0;  // Stop forward/backward velocity
                 }
             }
+            if (otherObject.isCollectible == true) {
+                this.collectObject(otherObject);
+            }
         }
     }
 
@@ -117,10 +113,11 @@ class PhysicsObject {
      * @param {Collectible} THREE.Object3D 
      */
     collectObject(collectible) {
+        this.isCollected == true;
         this.scene.remove(collectible.mesh)
         collectible.mesh.geometry.dispose();
         collectible.mesh.material.dispose();
-        console.log("i've been collected")
+        console.log('I have been collected!')
     }
 }
 
