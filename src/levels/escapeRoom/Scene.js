@@ -3,6 +3,7 @@ import Room from './Room';
 import Player from './Player';
 import Raycaster from './Raycaster';
 
+
 class Scene {
     constructor(renderer) {
         this.renderer = renderer;
