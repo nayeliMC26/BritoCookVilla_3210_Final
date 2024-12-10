@@ -6,6 +6,7 @@ import Platformer from "../levels/platformer/Platformer.js";
 import EscapeRoom from "../levels/escapeRoom/Scene.js";
 import Runner from "../levels/runner/scenes/MainScene.js";
 
+
 class Game {
     constructor(renderer) {
         // Renderer will be passed in from main

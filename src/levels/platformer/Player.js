@@ -9,10 +9,10 @@ class Player {
         this.physicsEngine = physicsEngine;
 
         this.size = new THREE.Vector3(5, 10, 5);
-        this.position = new THREE.Vector3(35, 5, 20.5);
-        this.speed = 17;
+        this.position = new THREE.Vector3(35, 5, 10);
+        this.speed = 25;
 
-        this.maxSpeed = 17;
+        this.maxSpeed = 25;
         this.maxJumps = 2;
         this.jumpCount = 0;
         
@@ -22,7 +22,7 @@ class Player {
         this.mesh = this.createPlayerMesh();
 
         // Create the physics object for the player
-        this.physicsObject = new PhysicsObject(this.scene, this.mesh, true, 'player');
+        this.physicsObject = new PhysicsObject(this.scene, this.mesh, true, false, 'player');
 
         // Add the physics object to the physics engine
         this.physicsEngine.addObject(this.physicsObject);
