@@ -117,7 +117,7 @@ class Raycaster {
      * @param {number} deltaTime - Time since the last frame
      */
     update(deltaTime) {
-        if (!this.controls.isLocked) return; // Skip if controls are not locked
+        // Checking which valve to animate
         for (let i = 0; i < this.animationState.length; i++) {
             this.rotation[i] = deltaTime;
             if (this.animationState[i]) {
@@ -196,7 +196,6 @@ class Raycaster {
      */
     #toggleValve(stateIndex) {
         this.states[stateIndex] = !this.states[stateIndex];
-        console.log(this.states[stateIndex])
         this.animationState[stateIndex - 4] = true;
     }
 
@@ -220,6 +219,7 @@ class Raycaster {
         });
 
         document.addEventListener('mousemove', () => {
+            if (!this.controls.isLocked) return;
             this.camera.getWorldDirection(this.direction);
             this.raycaster.set(this.camera.position, this.direction);
             this.intersections = this.raycaster.intersectObjects(this.objects.slice(0, 8));

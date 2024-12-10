@@ -289,7 +289,7 @@ class Platformer {
         this.player.update(deltaTime);
         this.physicsEngine.update(deltaTime);
         this.scene.fog.density = 0.0005 + (this.player.mesh.position.x / 96000);
-        // this.updateCamera();
+        this.updateCamera();
         if (this.player.mesh.position.x > 415 && this.player.mesh.position.x < 435) {
             this.lever.update();
         }
