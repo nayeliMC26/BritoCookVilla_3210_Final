@@ -12,7 +12,7 @@ class RainEffect {
     init() {
         // Geometry and material for the raindrops
         const rainMaterial = new THREE.PointsMaterial({
-            color: 0xaaaaaa,
+            color: 0x0aaaaa,
             size: 0.1,
             transparent: true,
             opacity: 0.5,

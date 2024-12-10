@@ -86,7 +86,7 @@ class Buildings extends Group {
 
     addPuddles(groundModel) {
         const puddleMaterial = new MeshStandardMaterial({
-            color: 0xffffff, // Slightly blue tint for the water
+            color: 0x0aaaaa, // Slightly blue tint for the water
             metalness: 0.9, // High reflectivity
             roughness: 0.0, // Very smooth surface
             transparent: true, // Allow slight transparency
