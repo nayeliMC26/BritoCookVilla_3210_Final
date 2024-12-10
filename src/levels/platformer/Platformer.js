@@ -10,7 +10,7 @@ class Platformer {
     constructor(inputHandler) {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
-        this.camera.position.set(0, 5, 60);
+        this.camera.position.set(0, 10, 50);
 
         this.inputHandler = inputHandler;
         this.clock = new THREE.Clock();
@@ -33,6 +33,7 @@ class Platformer {
         this.addPlatforms();
         this.addRopes();
         this.addBoxes();
+        this.addGates();
 
         this.spores = new Spores(this.scene);
     }
@@ -40,7 +41,7 @@ class Platformer {
 
 
     addFog() {
-        this.scene.fog = new THREE.FogExp2(0x000000, 0.005);
+        // this.scene.fog = new THREE.FogExp2(0x000000, 0.005);
     }
 
     addGridHelper() {
@@ -54,7 +55,7 @@ class Platformer {
         // Add ambient light
         var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
         this.scene.add(ambientLight);
-    
+
         var spotlights = [
             { x: 350, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 100000, target: { x: 250, y: 0, z: 10 }, withCone: false },
             { x: 250, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 100000, target: { x: 100, y: 0, z: 10 }, withCone: false },
@@ -64,7 +65,7 @@ class Platformer {
             { x: 300, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 5000, target: { x: 300, y: 0, z: 10 }, withCone: false },
             { x: 500, y: 200, z: 50, color: 0xffa21d, angle: Math.PI / 6, intensity: 2000, target: { x: 500, y: 0, z: 10 }, withCone: false }
         ];
-    
+
         // Add spotlights to the scene
         spotlights.forEach(({ x, y, z, color, angle, intensity, target, withCone }) => {
             var spotlight = new THREE.SpotLight(color, intensity);
@@ -72,15 +73,15 @@ class Platformer {
             spotlight.penumbra = 0.5;
             spotlight.decay = 2;
             spotlight.position.set(x, y, z);
-    
+
             var targetObject = new THREE.Object3D();
             targetObject.position.set(target.x, target.y, target.z);
             this.scene.add(targetObject);
             spotlight.target = targetObject;
-    
+
             spotlight.castShadow = true;
             this.scene.add(spotlight);
-    
+
             // Add spotlight cone mesh to show the cone of the light for dramatic effect
             if (withCone) {
                 var coneGeometry = new THREE.ConeGeometry(35, 130, 32);
@@ -99,7 +100,7 @@ class Platformer {
 
     addGround() {
         var groundGeometry = new THREE.PlaneGeometry(1920, 54);
-        var groundMaterial = new THREE.MeshPhongMaterial({ color: 0x4b76b6});
+        var groundMaterial = new THREE.MeshPhongMaterial({ color: 0x4b76b6 });
 
         var ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.position.set(960, 0, 25);
@@ -111,15 +112,22 @@ class Platformer {
     }
 
     addOuterWall() {
-        var groundGeometry = new THREE.PlaneGeometry(1920, 108);
-        var groundMaterial = new THREE.MeshPhongMaterial({ color: 0x4b76b6, visible: false });
+        var wallGeometry = new THREE.PlaneGeometry(1920, 108);
+        var wallMaterial = new THREE.MeshPhongMaterial({ color: 0x4b76b6, visible: false });
 
-        var ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.position.set(960, 54, 51);
-        ground.receiveShadow = true;
+        var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+        wall.position.set(960, 54, 20);
+        wall.receiveShadow = true;
 
-        this.scene.add(ground);
-        this.physicsEngine.addObject(new PhysicsObject(this.scene, ground, false, 'ground'));
+        this.scene.add(wall);
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, wall, false, 'wall'));
+
+        var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+        wall.position.set(960, 54, 0);
+        wall.receiveShadow = true;
+
+        this.scene.add(wall);
+        this.physicsEngine.addObject(new PhysicsObject(this.scene, wall, false, 'wall'));
     }
 
     addCeiling() {
@@ -144,16 +152,16 @@ class Platformer {
         var ropeMaterial = new THREE.MeshBasicMaterial({ color: 0x272727 });
 
         var rope = new THREE.Mesh(ropeGeometry, ropeMaterial);
-        rope.position.set(275, 0, 10);
+        rope.position.set(275, 0, 15);
         this.scene.add(rope);
     }
 
     addBoxes() {
         var positions = [
-            { x: 220, y: 5, z: 15.5, width: 15, height: 15, depth: 10 },
-            { x: 235, y: 10, z: 15.5, width: 15, height: 25, depth: 15 },
-            { x: 420, y: 67.5, z: 15.5, width: 20, height: 15, depth: 15 },
-            { x: 332, y: 25, z: 15.5, width: 20, height: 50, depth: 15 }
+            { x: 225, y: 5, z: 10, width: 15, height: 15, depth: 10 },
+            { x: 240, y: 10, z: 10, width: 15, height: 25, depth: 15 },
+            { x: 420, y: 67.5, z: 10, width: 20, height: 15, depth: 15 },
+            { x: 332, y: 25, z: 10, width: 20, height: 50, depth: 15 }
         ];
 
         positions.forEach((pos) => {
@@ -171,10 +179,10 @@ class Platformer {
 
     addPlatforms() {
         var positions = [
-            { x: 170, y: 15, z: 15.5, width: 70, height: 1, depth: 20 },
-            { x: 275, y: 35, z: 15.5, width: 50, height: 1, depth: 20 },
-            { x: 400, y: 60, z: 15.5, width: 90, height: 1, depth: 20 },
-            { x: 535, y: 45, z: 15.5, width: 110, height: 1, depth: 20 }
+            { x: 170, y: 15, z: 10, width: 70, height: 1, depth: 20 },
+            { x: 280, y: 35, z: 10, width: 50, height: 1, depth: 20 },
+            { x: 400, y: 60, z: 10, width: 90, height: 1, depth: 20 },
+            { x: 535, y: 45, z: 10, width: 110, height: 1, depth: 20 }
         ];
 
         positions.forEach((pos) => {
@@ -193,22 +201,42 @@ class Platformer {
         });
     }
 
+    addGates() {
+        var positions = [
+            { x: 698.5, y: 45, z: 20 }];
+
+        positions.forEach((pos) => {
+            var geo = new THREE.PlaneGeometry(60, 108);
+            var mat = new THREE.MeshPhongMaterial({ color: 0xffffff, visible: false });
+            var gate = new THREE.Mesh(geo, mat);
+            gate.position.set(pos.x, pos.y, pos.z)
+            gate.rotation.y = -Math.PI / 2;
+            this.scene.add(gate);
+            this.physicsEngine.addObject(new PhysicsObject(this.scene, gate, false, 'gate'));
+        })
+    }
+
     async loadAssets() {
         try {
             await this.assetLoader.loadAllAssets();
 
             var mapTexture = this.assetLoader.getAsset('map');
             var wallMesh = this.assetLoader.getAsset('wall');
+            var gateModel = this.assetLoader.getAsset('gate');
+
+            gateModel.position.set(700, 0, 35);
+            gateModel.scale.set(5, 7.6, 4);
+            this.scene.add(gateModel);
+
+
             wallMesh.receiveShadow = true;
-            wallMesh.position.set(35, 8.5, -12);
-            wallMesh.scale.set(4, 15, 14);
+            wallMesh.position.set(35, 8.5, -7);
+            wallMesh.scale.set(4, 15, 24.5);
             wallMesh.rotation.y = -Math.PI / 2;
             wallMesh.children.forEach((child) => {
                 if (child.material) child.material.color.set(0x4b76b6);
             });
-
             this.scene.add(wallMesh);
-
             var mapMaterial = new THREE.MeshBasicMaterial({
                 map: mapTexture,
                 side: THREE.DoubleSide,
@@ -225,7 +253,7 @@ class Platformer {
     createMapPlane(mapMaterial) {
         var mapGeometry = new THREE.PlaneGeometry(960, 108);
         var mapPlane = new THREE.Mesh(mapGeometry, mapMaterial);
-        mapPlane.position.set(480, 35, -5);
+        mapPlane.position.set(480, 35, 0);
         this.scene.add(mapPlane);
     }
 
@@ -285,8 +313,6 @@ class Platformer {
 
         console.log('Scene cleared.');
     }
-
-
 }
 
 export default Platformer;

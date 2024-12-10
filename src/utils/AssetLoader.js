@@ -80,14 +80,16 @@ class AssetLoader {
         try {
             // Replace with asset paths
             var mapSketch = this.loadTexture('./textures/map sketch.png');
-            var modelPromise = this.loadGLTFModel('./models/wall.gltf')
+            var modelPromise = this.loadGLTFModel('./models/wall.gltf');
+            var gateModel = this.loadGLTFModel('./models/gate.gltf');
 
             // Wait for all assets to load
-            var results = await Promise.all([mapSketch, modelPromise]);
+            var results = await Promise.all([mapSketch, modelPromise, gateModel]);
 
             // Store loaded assets
             this.assets.map = results[0];
             this.assets.wall = results[1];
+            this.assets.gate = results[2];
 
             console.log('All assets loaded:', this.assets);
         } catch (error) {
