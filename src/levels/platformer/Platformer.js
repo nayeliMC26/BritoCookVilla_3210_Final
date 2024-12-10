@@ -6,6 +6,7 @@ import PhysicsObject from '../../utils/PhysicsObject.js';
 import AssetLoader from '../../utils/AssetLoader';
 import Spores from './Spores';
 import Mushrooms from './entities/Mushrooms.js';
+import Lever from './entities/Lever.js';
 
 class Platformer {
     constructor(inputHandler) {
@@ -36,8 +37,16 @@ class Platformer {
         this.addBoxes();
         this.addGates();
         this.addMushrooms();
+        this.addLevers();
 
         this.spores = new Spores(this.scene);
+    }
+
+    addLevers() {
+        this.lever = new Lever(this.inputHandler);
+        this.lever.position.set(425, 67.5, 1)
+        this.scene.add(this.lever)
+        console.log(this.lever)
     }
 
 
@@ -101,7 +110,7 @@ class Platformer {
 
     addMushrooms() {
         var collectiblePositions = [
-            {x: 240, y: 30, z: 10},
+            { x: 240, y: 30, z: 10 },
             { x: 350, y: 10, z: 15 },
             { x: 837.5, y: 40, z: 15 },
             { x: 1100, y: 65, z: 15 },
@@ -198,7 +207,7 @@ class Platformer {
             { x: 280, y: 35, z: 10, width: 50, height: 1, depth: 20 },
             { x: 400, y: 60, z: 10, width: 90, height: 1, depth: 20 },
             { x: 535, y: 45, z: 10, width: 110, height: 1, depth: 20 },
-            {x: 837.5, y: 35, z: 10, width: 50, height: 1, depth: 20}
+            { x: 837.5, y: 35, z: 10, width: 50, height: 1, depth: 20 }
         ];
 
         positions.forEach((pos) => {
@@ -277,7 +286,10 @@ class Platformer {
         this.player.update(deltaTime);
         this.physicsEngine.update(deltaTime);
         this.scene.fog.density = 0.0005 + (this.player.mesh.position.x / 96000);
-        this.updateCamera();
+        // this.updateCamera();
+        if (this.player.mesh.position.x > 415 && this.player.mesh.position.x < 435) {
+            this.lever.update();
+        }
     }
 
     updateCamera() {

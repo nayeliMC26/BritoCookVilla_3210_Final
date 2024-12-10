@@ -6,6 +6,8 @@ class InputHandler {
         this.moveRight = false;
         this.jump = false;
         this.isJumping = false;
+        
+        this.interact = false;
 
         // Level switching keys
         this.key1 = false;
@@ -33,6 +35,10 @@ class InputHandler {
                     break;
                 case "Space":
                     this.jump = true;
+                    break;
+
+                case "KeyE":
+                    this.interact = true;
                     break;
 
                 // Level switching keys
@@ -65,6 +71,10 @@ class InputHandler {
                     break;
                 case "Space":
                     this.jump = false;
+                    break;
+
+                case "KeyE":
+                    this.interact = false;
                     break;
 
                 case "Digit1":
