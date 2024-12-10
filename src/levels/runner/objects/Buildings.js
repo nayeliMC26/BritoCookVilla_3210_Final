@@ -36,6 +36,7 @@ class Buildings extends Group {
                         color: existingMaterial.color, // Base color
                         roughness: 1.0, // Roughness for base
                         roughnessMap: roughnessMap, // Add roughness map
+                        depthWrite: true,
                     });
                 }
             });
@@ -90,6 +91,8 @@ class Buildings extends Group {
             roughness: 0.0, // Very smooth surface
             transparent: true, // Allow slight transparency
             opacity: 0.2, // Slightly transparent
+            depthWrite: true,
+            depthTest: true,
         });
 
         const puddleCount = 10; // Number of puddles to create

@@ -12,6 +12,7 @@ import {
     DirectionalLightHelper,
     RectAreaLight,
 } from "three";
+import RainEffect from "../shaders/RainEffect.js";
 
 class MainScene {
     constructor(renderer) {
@@ -42,9 +43,17 @@ class MainScene {
         this.rectAreaLightRear.lookAt(0, 0, 0); // Make it face the scene's center
 
         // Create moonlight
-        this.moonLight = new DirectionalLight(0xfcfcd7, 0.5); // Soft blue moonlight (color, intensity)
-        this.moonLight.position.set(50, 100, 30); // Position high above and angled
+        this.moonLight = new DirectionalLight(0xfcfcd7, 0.5); // Soft yellow moonlight (color, intensity)
+        this.moonLight.position.set(50, 100, 10); // Position high above and angled
         this.moonLightHelper = new DirectionalLightHelper(this.moonLight, 5);
+
+        this.moonLight.castShadow = true; // Ensure the light casts shadows
+
+        // Set the shadow properties (optional but recommended)
+        this.moonLight.shadow.mapSize.width = 1024; // Default is 512
+        this.moonLight.shadow.mapSize.height = 1024; // Default is 512
+        this.moonLight.shadow.camera.near = 0.1; // Near plane of the shadow camera
+        this.moonLight.shadow.camera.far = 100; // Far plane of the shadow camera
 
         // Add lights and helpers to the scene
         this.scene.add(this.ambientLight);
@@ -54,6 +63,8 @@ class MainScene {
         this.scene.add(this.moonLightHelper);
         this.scene.add(this.player);
         this.scene.add(this.buildings);
+
+        this.rain = new RainEffect(this.scene);
 
         // Initialize post-processing
         this.setupComposer();
@@ -106,6 +117,8 @@ class MainScene {
 
             const isJumping = this.player.isJumping;
             const isSliding = this.player.isSliding;
+
+            this.rain.update(deltaTime);
 
             // Update camera with player's current actions
             this.camera.update(deltaTime, isJumping, isSliding);

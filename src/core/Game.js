@@ -10,6 +10,10 @@ class Game {
     constructor(renderer) {
         // Renderer will be passed in from main
         this.renderer = renderer;
+        // Enable shadows in the renderer
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Optional: for softer shadows
+
         this.stats = new Stats();
         document.body.appendChild(this.stats.dom);
 
