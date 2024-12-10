@@ -19,11 +19,11 @@ class Buildings extends Group {
 
         // Load the roughness map
         const roughnessMap = this.textureLoader.load(
-            "../public/textures/gr1_roughnessmap.jpg"
+            "../textures/gr1_roughnessmap.jpg"
         );
 
         // Preload the ground model
-        this.loader.load("../public/models/block1.glb", (gltf) => {
+        this.loader.load("../models/block1.glb", (gltf) => {
             const groundModel = gltf.scene;
 
             // Apply roughness and puddle maps to the ground model
@@ -43,13 +43,13 @@ class Buildings extends Group {
 
             // Preload walls and ground into the pool
             this.loader.load(
-                "../public/models/windowCollection1.glb",
+                "../models/windowCollection1.glb",
                 (wallGltf1) => {
                     const wallModel1 = wallGltf1.scene;
                     this.applyEmissiveMaterial(wallModel1);
 
                     this.loader.load(
-                        "../public/models/windowCollection2.glb",
+                        "../models/windowCollection2.glb",
                         (wallGltf2) => {
                             const wallModel2 = wallGltf2.scene;
                             this.applyEmissiveMaterial(wallModel2);
