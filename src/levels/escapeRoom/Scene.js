@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import Room from '../../levels/escaperoom/Room.js'
-import Player from '../../levels/escaperoom/Player.js'
+import Room from '../../levels/escapeRoom/Room.js'
+import Player from '../../levels/escapeRoom/Player.js'
 
 class Scene {
     constructor(renderer) {
