@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import PhysicsObject from '/src/utils/PhysicsObject.js';
+import PhysicsObject from '../../levels/platformer/utils/PhysicsObject.js';
 /* A temp player class, which can later be replaced with an import model */
 /* Should probably treat like an object pool and reset positin when player falls off the map */
 class Player {

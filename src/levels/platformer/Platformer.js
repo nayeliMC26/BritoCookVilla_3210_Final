@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import PhysicsEngine from '../../utils/PhysicsEngine.js';
+import PhysicsEngine from '../../levels/platformer/utils/PhysicsEngine.js';
 import Player from '../../levels/platformer/Player.js';
 import Platform from './entities/Platform.js';
-import PhysicsObject from '../../utils/PhysicsObject.js';
-import AssetLoader from '../../utils/AssetLoader';
+import PhysicsObject from '../../levels/platformer/utils/PhysicsObject.js';
+import AssetLoader from '../../levels/platformer/utils/AssetLoader.js';
 import Spores from './Spores';
 import Mushrooms from './entities/Mushrooms.js';
 import Lever from './entities/Lever.js';
