@@ -22,7 +22,7 @@ class Player {
         this.mesh = this.createPlayerMesh();
 
         // Create the physics object for the player
-        this.physicsObject = new PhysicsObject(this.scene, this.mesh, true, 'player');
+        this.physicsObject = new PhysicsObject(this.scene, this.mesh, true, false, 'player');
 
         // Add the physics object to the physics engine
         this.physicsEngine.addObject(this.physicsObject);
