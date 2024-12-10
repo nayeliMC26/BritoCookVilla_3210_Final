@@ -21,6 +21,22 @@ class Player extends THREE.Group {
             "textures/animationframes/jump_frame2.PNG"
         );
 
+        // Metal maps for jump
+        this.metalJumpFrame1 = this.textureLoader.load(
+            "textures/animationframes/metal_jump_frame1.PNG"
+        );
+        this.metalJumpFrame2 = this.textureLoader.load(
+            "textures/animationframes/metal_jump_frame2.PNG"
+        );
+
+        // normal maps for jump
+        this.normalJumpFrame1 = this.textureLoader.load(
+            "textures/animationframes/normal_jump_frame1.PNG"
+        );
+        this.normalJumpFrame2 = this.textureLoader.load(
+            "textures/animationframes/normal_jump_frame2.PNG"
+        );
+
         // Load the textures for running animation
         let loadedTextures = 0;
         const totalFrames = 10; // Adjust the number of frames accordingly
@@ -74,8 +90,8 @@ class Player extends THREE.Group {
             normalMap: this.normalMaps[0],
             metalnessMap: this.metalnessMaps[0],
             transparent: true,
-            roughness: 0.5,
-            metalness: 0.1,
+            roughness: 0.3,
+            metalness: 0.5,
         });
 
         // Create the geometry and mesh
@@ -127,11 +143,15 @@ class Player extends THREE.Group {
     playJumpAnimation() {
         // Switch to jump_frame1
         this.material.map = this.jumpFrame1;
+        this.material.metalnessMap = this.metalJumpFrame1;
+        this.material.normalMap = this.normalJumpFrame1;
         this.material.needsUpdate = true;
 
         // After 0.2 seconds, switch to jump_frame2
         setTimeout(() => {
             this.material.map = this.jumpFrame2;
+            this.material.metalnessMap = this.metalJumpFrame2;
+            this.material.normalMap = this.normalJumpFrame2;
             this.material.needsUpdate = true;
         }, 100);
     }
