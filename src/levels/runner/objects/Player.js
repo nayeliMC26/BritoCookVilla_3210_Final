@@ -123,6 +123,7 @@ class Player extends THREE.Group {
 
         const collisionGeom = new THREE.PlaneGeometry(4, 4);
         this.collisionBox = new THREE.Mesh(collisionGeom, this.collisionMaterial );
+        this.collisionBox.scale.set(0.75, 1, 1);
         this.add(this.collisionBox);
 
         // Player position and state variables
@@ -214,7 +215,7 @@ class Player extends THREE.Group {
                 this.isJumping = true;
                 this.jumpVelocity = 10;
                 this.playJumpAnimation(); // Trigger jump animation
-                this.collisionBox.scale.set(0.5, 1, 1);
+                this.collisionBox.scale.set(0.35, 0.7, 1); // little smaller on height to allow feet to clip a little, better for fast movement
             }
 
             if (event.key === "s" && !this.isSliding) {
@@ -222,7 +223,7 @@ class Player extends THREE.Group {
                 this.gravity = -25;
                 this.playSlideAnimation(); // Trigger slide animation
                 this.targetY = 2; // Lower Y position when sliding
-                this.collisionBox.scale.set(1, 0.5, 1);
+                this.collisionBox.scale.set(0.7, 0.5, 1);
             }
         });
 
@@ -231,13 +232,13 @@ class Player extends THREE.Group {
                 this.isSliding = false; // Reset sliding state
                 this.gravity = -9;
                 this.playJumpAnimation();
-                this.collisionBox.scale.set(0.5,1,1);
+                this.collisionBox.scale.set(0.5,0.7,1);
                 this.targetY = 2; // Restore Y position after sliding
 
                 // Return to running animation if not jumping
                 if (!this.isJumping) {
                     this.startAnimation();
-                    this.collisionBox.scale.set(1,1,1);
+                    this.collisionBox.scale.set(0.75,1,1);
                 }
             }
         });
@@ -306,7 +307,7 @@ class Player extends THREE.Group {
 
                 if (!this.isSliding) {
                     this.collisionBox.position.y = 0;
-                    this.collisionBox.scale.set(1, 1, 1); // Reset scale
+                    this.collisionBox.scale.set(0.75, 1, 1); // Reset scale
                     // Return to running animation
                     this.startAnimation();
                 }
