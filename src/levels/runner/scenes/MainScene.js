@@ -14,6 +14,7 @@ import {
 import RainEffect from "../shaders/RainEffect.js";
 import GlowingParticles from "../shaders/GlowingParticles.js";
 import Background from "../objects/Background.js";
+import Obstacles from "../objects/Obstacles.js";
 
 class MainScene {
     constructor(renderer) {
@@ -26,6 +27,8 @@ class MainScene {
         this.scene = new THREE.Scene();
         this.player = new Player(this.scene);
         this.buildings = new Buildings();
+        this.obstacles = new Obstacles();
+        this.scene.add(this.obstacles);
 
         // Set up event listeners and other initializations
         this.lastJumpState = false;
@@ -114,6 +117,30 @@ class MainScene {
         this.renderer.resize();
     }
 
+    checkCollisions() {
+        const playerBox = this.player.getCollisionBox(); // This should return a Box3
+
+        // Iterate over obstacles
+        this.obstacles.children.forEach((obstacle) => {
+            const obstacleBox = new THREE.Box3().setFromObject(obstacle); // Create a Box3 for the obstacle
+
+            // Check if the player's Box3 intersects the obstacle's Box3
+            if (playerBox.intersectsBox(obstacleBox)) {
+                // Check if the obstacle has a hole and if the player is not below the hole
+                if (obstacle.hasHole) {
+                    // Check if player is above the hole
+                    if (playerBox.max.y <= 2) {
+                        // If the player's top is above y<2, treat as a valid pass-through
+                        console.log("Player passes through hole.");
+                    }
+                } else {
+                    // If the obstacle doesn't have a hole, a collision is detected
+                    console.log("Collision detected with obstacle!");
+                }
+            }
+        });
+    }
+
     animate() {
         // Calculate deltaTime
         const now = performance.now();
@@ -133,6 +160,7 @@ class MainScene {
         if (this.started) {
             this.player.update(deltaTime);
             this.buildings.update(deltaTime);
+            this.obstacles.update(deltaTime);
 
             const isJumping = this.player.isJumping;
             const isSliding = this.player.isSliding;
@@ -143,8 +171,8 @@ class MainScene {
             // Update camera with player's current actions
             this.camera.update(deltaTime, isJumping, isSliding);
 
-            // Check collisions
-            // console.log(this.buildings.checkCollisions(this.player));
+            // Check for collisions
+            this.checkCollisions();
         }
     }
 

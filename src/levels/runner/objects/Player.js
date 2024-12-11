@@ -219,6 +219,7 @@ class Player extends THREE.Group {
 
             if (event.key === "s" && !this.isSliding) {
                 this.isSliding = true;
+                this.gravity = -25;
                 this.playSlideAnimation(); // Trigger slide animation
                 this.targetY = 2; // Lower Y position when sliding
                 this.collisionBox.scale.set(1, 0.5, 1);
@@ -228,6 +229,7 @@ class Player extends THREE.Group {
         window.addEventListener("keyup", (event) => {
             if (event.key === "s") {
                 this.isSliding = false; // Reset sliding state
+                this.gravity = -9;
                 this.playJumpAnimation();
                 this.collisionBox.scale.set(0.5,1,1);
                 this.targetY = 2; // Restore Y position after sliding
@@ -310,7 +312,7 @@ class Player extends THREE.Group {
                 }
             }
         }
-        if (!this.sliding) {
+        if (!this.isSliding) {
             this.collisionBox.position.y = 0;
         }
 
@@ -331,6 +333,11 @@ class Player extends THREE.Group {
         }
 
         this.sparksSystem.update(deltaTime);
+    }
+
+    getCollisionBox() {
+        const box = new THREE.Box3().setFromObject(this.collisionBox);
+        return box;
     }
 }
 
