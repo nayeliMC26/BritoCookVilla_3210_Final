@@ -111,6 +111,7 @@ class Player extends THREE.Group {
             color: 0xff0000,
             transparent: true,
             opacity: 0,
+            alphaTest: true,
         })
 
         // Create the geometry and mesh
