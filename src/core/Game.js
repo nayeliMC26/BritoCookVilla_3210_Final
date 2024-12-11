@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import InputHandler from "../utils/InputHandler.js";
+import InputHandler from "../levels/platformer/utils/InputHandler.js";
 import Platformer from "../levels/platformer/Platformer.js";
 import EscapeRoom from "../levels/escapeRoom/Scene.js";
 import Runner from "../levels/runner/scenes/MainScene.js";

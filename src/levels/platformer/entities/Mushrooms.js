@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import PhysicsObject from '../../../utils/PhysicsObject';
+import PhysicsObject from '../../../levels/platformer/utils/PhysicsObject';
 
 class Mushrooms {
     constructor(scene, position, size, physicsEngine) {
