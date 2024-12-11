@@ -25,8 +25,8 @@ class Game {
         this.levelIndex = 0;
         // Create new levels
         this.levels = [
-            new EscapeRoom(this.renderer),
             new Platformer(this.inputHandler),
+            new EscapeRoom(this.renderer),
             new Runner(this.renderer),
         ];
         // Switch/start with level 0

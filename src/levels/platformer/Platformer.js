@@ -113,9 +113,9 @@ class Platformer {
 
         var positions = [
             { x: 240, y: 30, z: 10 },
-            { x: 350, y: 10, z: 15 },
-            { x: 837.5, y: 40, z: 15 },
-            { x: 1100, y: 65, z: 15 },
+            { x: 350, y: 10, z: 10 },
+            { x: 837.5, y: 40, z: 10 },
+            { x: 1100, y: 65, z: 10 },
         ];
 
         positions.forEach((pos) => {
@@ -187,7 +187,11 @@ class Platformer {
             { x: 225, y: 5, z: 10, width: 15, height: 15, depth: 15 },
             { x: 240, y: 10, z: 10, width: 15, height: 25, depth: 15 },
             { x: 420, y: 67.5, z: 10, width: 20, height: 15, depth: 15 },
-            { x: 332, y: 25, z: 10, width: 20, height: 50, depth: 15 }
+            { x: 332, y: 25, z: 10, width: 20, height: 50, depth: 15 },
+            { x: 535, y: 50, z: 10, width: 20, height: 15, depth: 15 },
+            { x: 550, y: 50, z: 10, width: 20, height: 25, depth: 15 },
+            // { x: 565, y: 50, z: 10, width: 20, height: 15, depth: 15 },
+
         ];
 
         positions.forEach((pos) => {
@@ -199,7 +203,7 @@ class Platformer {
             box.position.set(pos.x, pos.y, pos.z);
             box.castShadow = true;
 
-            this.physicsEngine.addObject(new PhysicsObject(this.scene, box, false, false, 'box'));
+            this.physicsEngine.addObject(new PhysicsObject(this.scene, box, true, false, 'box'));
             this.scene.add(box);
         });
     }
@@ -207,7 +211,7 @@ class Platformer {
     addPlatforms() {
         var positions = [
             { x: 170, y: 15, z: 10, width: 70, height: 1, depth: 20 },
-            { x: 280, y: 35, z: 10, width: 50, height: 1, depth: 20 },
+            { x: 283.5, y: 35, z: 10, width: 50, height: 1, depth: 20 },
             { x: 400, y: 60, z: 10, width: 90, height: 1, depth: 20 },
             { x: 535, y: 45, z: 10, width: 110, height: 1, depth: 20 },
             { x: 837.5, y: 35, z: 10, width: 50, height: 1, depth: 20 }
@@ -236,11 +240,11 @@ class Platformer {
         positions.forEach((pos) => {
             var geo = new THREE.PlaneGeometry(60, 108);
             var mat = new THREE.MeshPhongMaterial({ color: 0xffffff, visible: false });
-            var gate = new THREE.Mesh(geo, mat);
-            gate.position.set(pos.x, pos.y, pos.z)
-            gate.rotation.y = -Math.PI / 2;
-            this.scene.add(gate);
-            //this.physicsEngine.addObject(new PhysicsObject(this.scene, gate, false, false, 'gate'));
+            this.gate = new THREE.Mesh(geo, mat);
+            this.gate.position.set(pos.x, pos.y, pos.z)
+            this.gate.rotation.y = -Math.PI / 2;
+            this.scene.add(this.gate);
+            this.physicsEngine.addObject(new PhysicsObject(this.scene, this.gate, false, false, 'gate'));
         })
     }
 
@@ -250,11 +254,12 @@ class Platformer {
 
             var mapTexture = this.assetLoader.getAsset('map');
             var wallMesh = this.assetLoader.getAsset('wall');
-            var gateModel = this.assetLoader.getAsset('gate');
+            this.gateModel = this.assetLoader.getAsset('gate');
 
-            gateModel.position.set(700, 0, 35);
-            gateModel.scale.set(5, 7.6, 4);
-            // this.scene.add(gateModel);
+            this.gateModel.position.set(700, 0, 35);
+            this.gateModel.scale.set(5, 7.6, 4);
+            this.scene.add(this.gateModel);
+            console.log(this.gateModel);
 
 
             wallMesh.receiveShadow = true;
@@ -292,6 +297,12 @@ class Platformer {
         this.updateCamera();
         if (this.player.mesh.position.x > 415 && this.player.mesh.position.x < 435) {
             this.lever.update();
+            this.lever.displayInstruction(this.player.mesh)
+            if(this.lever.isPulled) {
+                var targetHeight = this.gate.position.y + 45;
+                this.gate.position.y = THREE.MathUtils.lerp(this.gate.position.y, targetHeight, 0.35); // Adjust the lerp factor as needed
+                this.gateModel.position.y = THREE.MathUtils.lerp(this.gateModel.position.y, targetHeight, 0.1); // Adjust the lerp factor as needed
+            }
         }
     }
 
