@@ -49,6 +49,8 @@ class Obstacles extends Group {
                 child.material.metalness = 0.2; // Set the metalness to a high value
                 child.material.roughness = 0.5; // Set the roughness to a lower value for a shinier appearance
                 child.material.envMapIntensity = 1; // Optional: Set the environment map intensity
+                child.castShadow = true;
+                child.receiveShadow = true;
             }
         });
     }

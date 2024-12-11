@@ -43,16 +43,18 @@ class MainScene {
         this.rectAreaLightRear.lookAt(0, 0, 0); // Make it face the scene's center
 
         // Create moonlight
-        this.moonLight = new DirectionalLight(0xfcfcd7, 0.5); // Soft yellow moonlight (color, intensity)
-        this.moonLight.position.set(100, 50, -50); // Position high above and angled
-
-        this.moonLight.castShadow = true; // Ensure the light casts shadows
-
-        // Set the shadow properties (optional but recommended)
+        this.moonLight = new DirectionalLight(0xfcfcd7, 0.5);
+        this.moonLight.position.set(100, 50, -50);
+        this.moonLight.castShadow = true;
         this.moonLight.shadow.mapSize.width = 2048;
         this.moonLight.shadow.mapSize.height = 2048;
         this.moonLight.shadow.camera.near = 0.1;
         this.moonLight.shadow.camera.far = 2000;
+        this.moonLight.shadow.camera.left = -100;
+        this.moonLight.shadow.camera.right = 100;
+        this.moonLight.shadow.camera.top = 100;
+        this.moonLight.shadow.camera.bottom = -100;
+        this.scene.add(this.moonLight);
 
         // Add lights and helpers to the scene
         this.scene.add(this.ambientLight);
