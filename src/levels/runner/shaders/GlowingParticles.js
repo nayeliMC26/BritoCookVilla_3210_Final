@@ -15,12 +15,12 @@ class GlowingParticles {
     init() {
         // Geometry and material for the particles
         const particleMaterial = new THREE.PointsMaterial({
-            color: 0xa069ff,
+            color: 0xffd18c,
             size: 0.3,
             transparent: true,
             opacity: 1,
             depthWrite: true,
-            emissive: 0xa069ff, // Set emissive color (glowing)
+            emissive: 0xffd18c, // Set emissive color (glowing)
             emissiveIntensity: 2, // Set the intensity of the glow
         });
 

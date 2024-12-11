@@ -24,7 +24,7 @@ class MainScene {
         this.renderer = renderer;
         this.camera = new Camera();
         this.scene = new THREE.Scene();
-        this.player = new Player();
+        this.player = new Player(this.scene);
         this.buildings = new Buildings();
 
         // Set up event listeners and other initializations

@@ -1,7 +1,8 @@
 import * as THREE from "three";
+import Sparks from "../shaders/Sparks";
 
 class Player extends THREE.Group {
-    constructor() {
+    constructor(scene) {
         super();
 
         // Create a texture loader to load PNG images
@@ -101,10 +102,16 @@ class Player extends THREE.Group {
             normalMap: this.normalMaps[0],
             metalnessMap: this.metalnessMaps[0],
             transparent: true,
-            roughness: 0.3,
-            metalness: 0.5,
+            roughness: 0.01,
+            metalness: 0.6,
             alphaTest: 0.5, // Discard fragments with alpha below 0.5
         });
+
+        this.collisionMaterial = new THREE.MeshStandardMaterial( {
+            color: 0xff0000,
+            transparent: true,
+            opacity: 0,
+        })
 
         // Create the geometry and mesh
         const geometry = new THREE.PlaneGeometry(4, 4);
@@ -112,6 +119,10 @@ class Player extends THREE.Group {
         this.playerMesh.receiveShadow = true;
         this.playerMesh.castShadow = true;
         this.add(this.playerMesh);
+
+        const collisionGeom = new THREE.PlaneGeometry(4, 4);
+        this.collisionBox = new THREE.Mesh(collisionGeom, this.collisionMaterial );
+        this.add(this.collisionBox);
 
         // Player position and state variables
         this.position.y = 2;
@@ -125,8 +136,8 @@ class Player extends THREE.Group {
         this.isSliding = false;
         this.targetY = 2; // Default Y position for sliding
 
-        // Create the flash effect
         this.createFlashEffect();
+        this.sparksSystem = new Sparks(scene);
 
         // Animation control
         this.animationInterval = null;
@@ -137,7 +148,7 @@ class Player extends THREE.Group {
         // Create a sphere to represent the flash
         const flashGeometry = new THREE.SphereGeometry(1, 32, 32);
         const flashMaterial = new THREE.MeshStandardMaterial({
-            color: 0xffb94f, // Blue color for the flash
+            color: 0xffb94f,
             emissive: new THREE.Color(0xffb94f), // Ensure emissive is a THREE.Color
             emissiveIntensity: 0, // Set emissive intensity
             transparent: true,
@@ -153,17 +164,44 @@ class Player extends THREE.Group {
     // Trigger the flash effect (blue and emissive for 0.2s, then reset)
     triggerFlashEffect() {
         if (this.flash) {
-            // Animate the flash effect (emissive and blue for 0.2 seconds)
-            this.flash.material.opacity = 0.4;
+            // Animate the flash effect
+            this.flash.material.opacity = 0.5;
             this.flash.material.emissiveIntensity = 1;
             this.flash.scale.set(0.5, 0.5, 0.5); // Scale it up for a noticeable flash effect
 
-            // After 0.2 seconds, reset the flash to its original state
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.9;
+            }, 50);
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.8;
+            }, 100);
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.7;
+            }, 150);
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.6;
+            }, 200); 
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.5;
+            }, 250); 
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.4;
+            }, 300); 
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.3;
+            }, 350); 
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.2;
+            }, 400); 
+            setTimeout(() => {
+                this.flash.material.emissiveIntensity = 0.1;
+            }, 450); 
+
             setTimeout(() => {
                 this.flash.material.opacity = 0; // Make it invisible again
                 this.flash.material.emissiveIntensity = 0;
                 this.flash.scale.set(0, 0, 0); // Reset scale to 0
-            }, 100); // Flash duration: 0.2 seconds
+            }, 500);
         }
     }
 
@@ -175,23 +213,28 @@ class Player extends THREE.Group {
                 this.isJumping = true;
                 this.jumpVelocity = 10;
                 this.playJumpAnimation(); // Trigger jump animation
+                this.collisionBox.scale.set(0.5, 1, 1);
             }
 
             if (event.key === "s" && !this.isSliding) {
                 this.isSliding = true;
                 this.playSlideAnimation(); // Trigger slide animation
                 this.targetY = 2; // Lower Y position when sliding
+                this.collisionBox.scale.set(1, 0.5, 1);
             }
         });
 
         window.addEventListener("keyup", (event) => {
             if (event.key === "s") {
                 this.isSliding = false; // Reset sliding state
+                this.playJumpAnimation();
+                this.collisionBox.scale.set(0.5,1,1);
                 this.targetY = 2; // Restore Y position after sliding
 
                 // Return to running animation if not jumping
                 if (!this.isJumping) {
                     this.startAnimation();
+                    this.collisionBox.scale.set(1,1,1);
                 }
             }
         });
@@ -249,31 +292,44 @@ class Player extends THREE.Group {
         if (this.isJumping) {
             this.position.y += this.jumpVelocity * deltaTime; // Apply deltaTime to jump velocity
             this.jumpVelocity += this.gravity * deltaTime; // Apply deltaTime to gravity
+            this.collisionBox.position.y = 0;
 
             if (this.position.y <= 2) {
                 this.position.y = 2;
                 this.isJumping = false;
                 this.jumpCounter = 0;
                 this.jumpVelocity = 0;
+                this.collisionBox.position.y = 0;
 
                 if (!this.isSliding) {
-                    this.playerMesh.scale.set(1, 1, 1); // Reset scale
+                    this.collisionBox.position.y = 0;
+                    this.collisionBox.scale.set(1, 1, 1); // Reset scale
                     // Return to running animation
                     this.startAnimation();
                 }
             }
+        }
+        if (!this.sliding) {
+            this.collisionBox.position.y = 0;
         }
 
         // Smoothly move to target Y position for sliding
         if (!this.isJumping && this.position.y !== this.targetY) {
             this.position.y +=
                 (this.targetY - this.position.y) * 0.1 * deltaTime; // Smooth transition with deltaTime
+                this.collisionBox.position.y = 0;
         }
 
         // Ensure slide animation persists while sliding
         if (this.isSliding) {
             this.playSlideAnimation(); // Keep the slide animation active
+            this.collisionBox.position.y = -1;
+            if ((this.position.y == this.targetY)) {
+                this.sparksSystem.spawnSparks();
+            }
         }
+
+        this.sparksSystem.update(deltaTime);
     }
 }
 

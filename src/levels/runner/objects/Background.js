@@ -6,7 +6,7 @@ class Background extends Group {
         super();
 
         // Set the background color of the scene to black
-        scene.background = new THREE.Color(0x000000);
+        scene.background = new THREE.Color(0x080212);
 
         // Define how many stars you want
         const numStars = 1000;  // Number of stars
