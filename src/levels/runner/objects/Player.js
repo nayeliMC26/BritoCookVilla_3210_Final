@@ -157,7 +157,7 @@ class Player extends THREE.Group {
         });
 
         this.flash = new THREE.Mesh(flashGeometry, flashMaterial);
-        this.flash.position.set(0, -2.1, 0); // Positioned at the bottom middle of the player
+        this.flash.position.set(-0.4, -2.3, 0); // Positioned at the bottom middle of the player
         this.flash.scale.set(0, 0, 0); // Initially, it's invisible (scaled down)
         this.add(this.flash); // Add to player group
     }

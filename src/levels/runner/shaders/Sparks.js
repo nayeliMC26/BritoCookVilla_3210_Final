@@ -5,7 +5,7 @@ class Sparks {
         this.scene = scene;
         this.sparksCount = 200; // Number of sparks
         this.pool = []; // Pool of sparks
-        this.spawnPoint = new THREE.Vector3(2, 0, 0); // Spawn point for sparks (player's position)
+        this.spawnPoint = new THREE.Vector3(1.8, 0, 0); // Spawn point for sparks (player's position)
         this.xVelocityRange = [-5, 1]; // Range of horizontal velocities
         this.yVelocityRange = [5, 10]; // Range of vertical velocities
         this.zVelocityRange = [-2, 2]; // Range of forward/backward velocities
@@ -15,10 +15,12 @@ class Sparks {
 
     init() {
         // Geometry and material for the sparks
-        const sparkMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffa500, // Spark color (orange)
+        const sparkMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffaf26, // Spark color (orange)
             transparent: true,
-            opacity: 0.8,
+            opacity: 0.5,
+            emissive: 0xff9021,
+            emissiveIntensity: 2,
         });
 
         // Create spark mesh for each spark

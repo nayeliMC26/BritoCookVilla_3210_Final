@@ -5,16 +5,12 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import Camera from "../core/Camera.js";
 import Player from "../objects/Player.js";
 import Buildings from "../objects/Buildings.js";
-import {
-    AmbientLight,
-    DirectionalLight,
-    DirectionalLightHelper,
-    RectAreaLight,
-} from "three";
+import { AmbientLight, DirectionalLight, RectAreaLight } from "three";
 import RainEffect from "../shaders/RainEffect.js";
 import GlowingParticles from "../shaders/GlowingParticles.js";
 import Background from "../objects/Background.js";
 import Obstacles from "../objects/Obstacles.js";
+import Fabric from "../shaders/Fabric.js";
 
 class MainScene {
     constructor(renderer) {
@@ -74,6 +70,7 @@ class MainScene {
 
         this.rain = new RainEffect(this.scene);
         this.glowingParticles = new GlowingParticles(this.scene);
+        this.fabric = new Fabric(this.scene);
 
         // Initialize post-processing
         this.setupComposer();
@@ -81,7 +78,6 @@ class MainScene {
         this.started = false;
     }
 
-    // Define init method for setup logic
     init() {
         console.log("Initializing MainScene...");
 
@@ -132,6 +128,8 @@ class MainScene {
                     if (playerBox.max.y <= 2) {
                         // If the player's top is above y<2, treat as a valid pass-through
                         console.log("Player passes through hole.");
+                    } else {
+                        console.log("Collision detected with obstacle!");
                     }
                 } else {
                     // If the obstacle doesn't have a hole, a collision is detected
@@ -167,6 +165,7 @@ class MainScene {
 
             this.rain.update(deltaTime);
             this.glowingParticles.update(deltaTime);
+            this.fabric.update(deltaTime);
 
             // Update camera with player's current actions
             this.camera.update(deltaTime, isJumping, isSliding);

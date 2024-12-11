@@ -1,4 +1,4 @@
-import { Group } from "three";
+import { Group, MeshStandardMaterial } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 class Obstacles extends Group {
@@ -23,14 +23,33 @@ class Obstacles extends Group {
 
         // Load box.glb
         this.loader.load(modelPaths[0], (gltf) => {
+            this.applyMetalnessToModel(gltf.scene); // Apply metalness to the box model
             models.push({ scene: gltf.scene, hasHole: false });// Store the box model
             this.checkModelsLoaded(size, models);
         });
 
         // Load hole.glb
         this.loader.load(modelPaths[1], (gltf) => {
+            this.applyMetalnessToModel(gltf.scene); // Apply metalness to the box model
             models.push({ scene: gltf.scene, hasHole: true }); // Store the hole model
             this.checkModelsLoaded(size, models);
+        });
+    }
+
+    // Method to apply metalness to all meshes in a scene
+    applyMetalnessToModel(scene) {
+        scene.traverse((child) => {
+            if (child.isMesh) {
+                // If the material is not already a MeshStandardMaterial, we create one
+                if (!(child.material instanceof MeshStandardMaterial)) {
+                    child.material = new MeshStandardMaterial();
+                }
+                
+                // Set metalness and other properties (you can customize these values)
+                child.material.metalness = 0.2; // Set the metalness to a high value
+                child.material.roughness = 0.5; // Set the roughness to a lower value for a shinier appearance
+                child.material.envMapIntensity = 1; // Optional: Set the environment map intensity
+            }
         });
     }
 
