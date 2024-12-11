@@ -130,13 +130,27 @@ class MainScene {
                         console.log("Player passes through hole.");
                     } else {
                         console.log("Collision detected with obstacle!");
+                        this.endGame(); // End the game if there's a collision
                     }
                 } else {
                     // If the obstacle doesn't have a hole, a collision is detected
                     console.log("Collision detected with obstacle!");
+                    this.endGame(); // End the game if there's a collision
                 }
             }
         });
+    }
+
+    endGame() {
+        // Stop the game
+        this.started = false;
+
+        // Show the end screen
+        const endScreen = document.getElementById("end-screen");
+        endScreen.style.display = "flex"; // Make it visible
+
+        // Clear the scene
+        this.clear();
     }
 
     animate() {
