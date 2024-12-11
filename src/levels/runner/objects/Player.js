@@ -103,35 +103,77 @@ class Player extends THREE.Group {
             transparent: true,
             roughness: 0.3,
             metalness: 0.5,
+            alphaTest: 0.5, // Discard fragments with alpha below 0.5
         });
 
         // Create the geometry and mesh
         const geometry = new THREE.PlaneGeometry(4, 4);
         this.playerMesh = new THREE.Mesh(geometry, this.material);
+        this.playerMesh.receiveShadow = true;
+        this.playerMesh.castShadow = true;
         this.add(this.playerMesh);
 
         // Player position and state variables
         this.position.y = 2;
         this.isJumping = false;
         this.jumpVelocity = 0;
-        this.gravity = -0.007;
+        this.gravity = -9;
         this.jumpCounter = 0;
+        this.flash = null;
 
         // Sliding properties
         this.isSliding = false;
         this.targetY = 2; // Default Y position for sliding
+
+        // Create the flash effect
+        this.createFlashEffect();
 
         // Animation control
         this.animationInterval = null;
         this.keyPress();
     }
 
+    createFlashEffect() {
+        // Create a sphere to represent the flash
+        const flashGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const flashMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffb94f, // Blue color for the flash
+            emissive: new THREE.Color(0xffb94f), // Ensure emissive is a THREE.Color
+            emissiveIntensity: 0, // Set emissive intensity
+            transparent: true,
+            opacity: 0, // Initially transparent
+        });
+
+        this.flash = new THREE.Mesh(flashGeometry, flashMaterial);
+        this.flash.position.set(0, -2.1, 0); // Positioned at the bottom middle of the player
+        this.flash.scale.set(0, 0, 0); // Initially, it's invisible (scaled down)
+        this.add(this.flash); // Add to player group
+    }
+
+    // Trigger the flash effect (blue and emissive for 0.2s, then reset)
+    triggerFlashEffect() {
+        if (this.flash) {
+            // Animate the flash effect (emissive and blue for 0.2 seconds)
+            this.flash.material.opacity = 0.4;
+            this.flash.material.emissiveIntensity = 1;
+            this.flash.scale.set(0.5, 0.5, 0.5); // Scale it up for a noticeable flash effect
+
+            // After 0.2 seconds, reset the flash to its original state
+            setTimeout(() => {
+                this.flash.material.opacity = 0; // Make it invisible again
+                this.flash.material.emissiveIntensity = 0;
+                this.flash.scale.set(0, 0, 0); // Reset scale to 0
+            }, 100); // Flash duration: 0.2 seconds
+        }
+    }
+
     keyPress() {
         window.addEventListener("keydown", (event) => {
             if (event.key === "w" && this.jumpCounter < 2) {
+                this.triggerFlashEffect(); // Trigger the flash effect on jump
                 this.jumpCounter++;
                 this.isJumping = true;
-                this.jumpVelocity = 0.2;
+                this.jumpVelocity = 10;
                 this.playJumpAnimation(); // Trigger jump animation
             }
 
@@ -202,11 +244,11 @@ class Player extends THREE.Group {
         }, 1000 / 12); // 12 frames per second
     }
 
-    update() {
+    update(deltaTime) {
         // Handle jump and gravity
         if (this.isJumping) {
-            this.position.y += this.jumpVelocity;
-            this.jumpVelocity += this.gravity;
+            this.position.y += this.jumpVelocity * deltaTime; // Apply deltaTime to jump velocity
+            this.jumpVelocity += this.gravity * deltaTime; // Apply deltaTime to gravity
 
             if (this.position.y <= 2) {
                 this.position.y = 2;
@@ -224,7 +266,8 @@ class Player extends THREE.Group {
 
         // Smoothly move to target Y position for sliding
         if (!this.isJumping && this.position.y !== this.targetY) {
-            this.position.y += (this.targetY - this.position.y) * 0.1; // Smooth transition
+            this.position.y +=
+                (this.targetY - this.position.y) * 0.1 * deltaTime; // Smooth transition with deltaTime
         }
 
         // Ensure slide animation persists while sliding

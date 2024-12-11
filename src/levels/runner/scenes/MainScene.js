@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
-// import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
-// import DistortionShader from "../shaders/DistortionShader.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass"; // Add this import
 import Camera from "../core/Camera.js";
 import Player from "../objects/Player.js";
 import Buildings from "../objects/Buildings.js";
@@ -13,6 +12,8 @@ import {
     RectAreaLight,
 } from "three";
 import RainEffect from "../shaders/RainEffect.js";
+import GlowingParticles from "../shaders/GlowingParticles.js";
+import Background from "../objects/Background.js";
 
 class MainScene {
     constructor(renderer) {
@@ -30,7 +31,7 @@ class MainScene {
         this.lastJumpState = false;
         this.lastSlideState = false;
 
-        this.ambientLight = new AmbientLight(0x404040, 0.5); // Existing ambient light
+        this.ambientLight = new AmbientLight(0xffffff, 0.2); // Existing ambient light
 
         // Create front RectAreaLight
         this.rectAreaLightFront = new RectAreaLight(0x0000ff, 2, 10, 10); // (color, intensity, width, height)
@@ -44,27 +45,32 @@ class MainScene {
 
         // Create moonlight
         this.moonLight = new DirectionalLight(0xfcfcd7, 0.5); // Soft yellow moonlight (color, intensity)
-        this.moonLight.position.set(50, 100, 10); // Position high above and angled
-        this.moonLightHelper = new DirectionalLightHelper(this.moonLight, 5);
+        this.moonLight.position.set(100, 50, -50); // Position high above and angled
 
         this.moonLight.castShadow = true; // Ensure the light casts shadows
 
         // Set the shadow properties (optional but recommended)
-        this.moonLight.shadow.mapSize.width = 1024; // Default is 512
-        this.moonLight.shadow.mapSize.height = 1024; // Default is 512
-        this.moonLight.shadow.camera.near = 0.1; // Near plane of the shadow camera
-        this.moonLight.shadow.camera.far = 100; // Far plane of the shadow camera
+        this.moonLight.shadow.mapSize.width = 2048;
+        this.moonLight.shadow.mapSize.height = 2048;
+        this.moonLight.shadow.camera.near = 0.1;
+        this.moonLight.shadow.camera.far = 2000;
 
         // Add lights and helpers to the scene
         this.scene.add(this.ambientLight);
+
         this.scene.add(this.rectAreaLightFront);
         this.scene.add(this.rectAreaLightRear);
+
         this.scene.add(this.moonLight);
-        this.scene.add(this.moonLightHelper);
+
         this.scene.add(this.player);
         this.scene.add(this.buildings);
 
+        this.background = new Background(this.scene);
+        this.scene.add(this.background);
+
         this.rain = new RainEffect(this.scene);
+        this.glowingParticles = new GlowingParticles(this.scene);
 
         // Initialize post-processing
         this.setupComposer();
@@ -74,7 +80,6 @@ class MainScene {
 
     // Define init method for setup logic
     init() {
-        // This is the method that gets called when the level is activated
         console.log("Initializing MainScene...");
 
         // Put your setup logic here (e.g., set initial player position, etc.)
@@ -82,8 +87,22 @@ class MainScene {
     }
 
     setupComposer() {
+        // Create the composer for post-processing
         this.composer = new EffectComposer(this.renderer);
+
+        // Add a render pass to the composer
         this.composer.addPass(new RenderPass(this.scene, this.camera));
+
+        // Set up the Bloom pass
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight), // Resolution
+            10, // Bloom strength (higher value means more glow)
+            1.4, // Bloom radius
+            0.2 // Bloom threshold (lower value means more parts of the scene will bloom)
+        );
+
+        // Add the bloom pass to the composer
+        this.composer.addPass(bloomPass);
     }
 
     addEventListeners() {
@@ -112,13 +131,14 @@ class MainScene {
 
     update(deltaTime) {
         if (this.started) {
-            this.player.update();
-            this.buildings.update();
+            this.player.update(deltaTime);
+            this.buildings.update(deltaTime);
 
             const isJumping = this.player.isJumping;
             const isSliding = this.player.isSliding;
 
             this.rain.update(deltaTime);
+            this.glowingParticles.update(deltaTime);
 
             // Update camera with player's current actions
             this.camera.update(deltaTime, isJumping, isSliding);
@@ -134,7 +154,7 @@ class MainScene {
     }
 
     render() {
-        this.renderer.render(this.scene, this.camera);
+        this.composer.render();
     }
 
     clear() {

@@ -16,6 +16,9 @@ class Buildings extends Group {
         this.pool = [];
         this.activeBuildings = [];
         this.collisionBoxes = [];
+        this.timeElapsed = 0; // Initialize timeElapsed for speed calculation
+        this.speedFactor = 0.1; // Initial speed
+        this.speedIncreaseRate = 0.001; // Rate at which speed increases
 
         // Load the roughness map
         const roughnessMap = this.textureLoader.load(
@@ -34,53 +37,57 @@ class Buildings extends Group {
                     child.material = new MeshStandardMaterial({
                         map: existingMaterial.map, // Base color map
                         color: existingMaterial.color, // Base color
-                        roughness: 1.0, // Roughness for base
                         roughnessMap: roughnessMap, // Add roughness map
+                        roughness: 1.0, // Roughness for base
+                        metalness: 0.01,
                         depthWrite: true,
                     });
                 }
+
+                // Enable shadows for the mesh
+                child.castShadow = true;
+                child.receiveShadow = true;
             });
 
             // Preload walls and ground into the pool
-            this.loader.load(
-                "../models/windowCollection1.glb",
-                (wallGltf1) => {
-                    const wallModel1 = wallGltf1.scene;
-                    this.applyEmissiveMaterial(wallModel1);
+            this.loader.load("../models/windowCollection1.glb", (wallGltf1) => {
+                const wallModel1 = wallGltf1.scene;
+                this.applyEmissiveMaterial(wallModel1);
 
-                    this.loader.load(
-                        "../models/windowCollection2.glb",
-                        (wallGltf2) => {
-                            const wallModel2 = wallGltf2.scene;
-                            this.applyEmissiveMaterial(wallModel2);
+                this.loader.load(
+                    "../models/windowCollection2.glb",
+                    (wallGltf2) => {
+                        const wallModel2 = wallGltf2.scene;
+                        this.applyEmissiveMaterial(wallModel2);
 
-                            for (let i = 0; i < 10; i++) {
-                                const groundClone = groundModel.clone();
-                                groundClone.scale.set(10, 1, 7);
-                                groundClone.position.set(i * 10, 0, 0);
+                        // Create 10 buildings (ground + walls)
+                        for (let i = 0; i < 10; i++) {
+                            const groundClone = groundModel.clone();
+                            groundClone.scale.set(10, 1, 7);
+                            groundClone.position.set(i * 10, 0, 0);
 
-                                // Add puddles to the ground
-                                this.addPuddles(groundClone);
+                            // Add puddles to the ground
+                            this.addPuddles(groundClone);
 
-                                const wallClone =
-                                    Math.random() > 0.5
-                                        ? wallModel1.clone()
-                                        : wallModel2.clone();
-                                wallClone.scale.set(0.49, 3, 1);
-                                wallClone.position.set(0, -4, -0.4);
+                            const wallClone =
+                                Math.random() > 0.5
+                                    ? wallModel1.clone()
+                                    : wallModel2.clone();
+                            wallClone.scale.set(0.49, 3, 1);
+                            wallClone.position.set(0, -4, -0.4);
 
-                                groundClone.add(wallClone);
+                            groundClone.add(wallClone);
 
-                                this.pool.push(groundClone);
-                            }
-
-                            for (let i = 0; i < 10; i++) {
-                                this.addBuilding();
-                            }
+                            this.pool.push(groundClone);
                         }
-                    );
-                }
-            );
+
+                        // Add 10 buildings to the scene after everything is loaded
+                        for (let i = 0; i < 10; i++) {
+                            this.addBuilding();
+                        }
+                    }
+                );
+            });
         });
     }
 
@@ -115,6 +122,9 @@ class Buildings extends Group {
                 Math.random() * groundBounds.z - groundBounds.z / 2
             );
 
+            // Enable shadow receiving for puddles
+            puddle.receiveShadow = true;
+
             groundModel.add(puddle);
         }
     }
@@ -130,6 +140,10 @@ class Buildings extends Group {
                     color: existingMaterial.color, // Base color
                 });
             }
+
+            // Enable shadows for the wall model
+            child.castShadow = true;
+            child.receiveShadow = true;
         });
     }
 
@@ -143,11 +157,16 @@ class Buildings extends Group {
         }
     }
 
-    update() {
+    update(deltaTime) {
+        // Increase the speed over time
+        this.timeElapsed += deltaTime;
+        this.speedFactor += this.speedIncreaseRate * deltaTime; // Speed up with time
+
         const resetPositionX = (this.activeBuildings.length * 34) / 2;
 
         this.activeBuildings.forEach((building) => {
-            building.position.x -= 0.1;
+            // Apply the speed factor to building movement
+            building.position.x -= this.speedFactor;
 
             if (building.position.x < -resetPositionX) {
                 building.position.x = resetPositionX;

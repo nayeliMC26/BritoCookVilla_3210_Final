@@ -12,10 +12,10 @@ class RainEffect {
     init() {
         // Geometry and material for the raindrops
         const rainMaterial = new THREE.PointsMaterial({
-            color: 0x0aaaaa,
+            color: 0xaaaaaa,
             size: 0.1,
             transparent: true,
-            opacity: 0.5,
+            opacity: 0.3,
             depthWrite: true,
         });
 
@@ -25,7 +25,7 @@ class RainEffect {
 
         // Initialize raindrops
         for (let i = 0; i < this.rainCount; i++) {
-            rainPositions[i * 3] = Math.random() * 400 - 200; // X position
+            rainPositions[i * 3] = Math.random() * 800 - 300; // X position
             rainPositions[i * 3 + 1] = Math.random() * 500 + 200; // Y position (starts above)
             rainPositions[i * 3 + 2] = Math.random() * 400 - 200; // Z position
         }
@@ -61,12 +61,13 @@ class RainEffect {
 
             // Move the raindrop
             position.y -= this.velocity * deltaTime; // Use fixed velocity
+            position.x -= this.velocity * deltaTime
 
             // Check if the raindrop has fallen below the reset Y position
             if (position.y < -100) {
                 // Reset raindrop position to a random location above the scene
+                position.x = Math.random() * 800 - 300; // Random X
                 position.y = Math.random() * 200 + 200; // Random Y above the scene
-                position.x = Math.random() * 400 - 200; // Random X
                 position.z = Math.random() * 400 - 200; // Random Z
             }
 
