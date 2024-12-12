@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import InputHandler from "../utils/InputHandler.js";
+import InputHandler from "../levels/platformer/utils/InputHandler.js";
 import Platformer from "../levels/platformer/Platformer.js";
 import EscapeRoom from "../levels/escapeRoom/Scene.js";
 import Runner from "../levels/runner/scenes/MainScene.js";
@@ -61,12 +61,6 @@ class Game {
         if (this.activeLevel instanceof Runner) {
             this.activeLevel.start(); // Start the Runner game when it becomes active
         }
-
-        // Add orbit controls for debugging
-        // if (this.activeLevel.camera) {
-        // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
-        // this.controls.update();
-        // }
     }
 
     update(deltaTime) {
