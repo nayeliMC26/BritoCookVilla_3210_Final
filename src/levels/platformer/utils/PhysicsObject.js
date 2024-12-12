@@ -19,10 +19,13 @@ class PhysicsObject {
 
         // Create a Box3 for collision detection
         this.boundingBox = new THREE.Box3().setFromCenterAndSize(this.position, this.size);
+        // console.log(this.boundingBox)
 
         // Create Box3Helper to visualize the bounding box
         this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xff0000);
         this.scene.add(this.boundingBoxHelper);
+
+        this.mushroomCount = 0;
     }
 
     updateBoundingBox() {
@@ -89,10 +92,24 @@ class PhysicsObject {
             axis = 'z';
             overlap = overlapZ;
         }
-        
-        var delta = axis === 'x' ? dx : axis === 'y' ? dy : dz;
-        var direction = delta > 0 ? 1 : -1;
-        
+
+        var delta;
+        if (axis === 'x') {
+            delta = dx;
+        } else if (axis === 'y') {
+            delta = dy;
+        } else {
+            delta = dz;
+        }
+
+        var direction;
+        if (delta > 0) {
+            direction = 1;
+        } else {
+            direction = -1;
+        }
+
+
         if (this.isDynamic && !otherObject.isDynamic) {
             // Dynamic object collides with static object
             this.position[axis] += direction * overlap;
@@ -134,8 +151,15 @@ class PhysicsObject {
                 this.velocity[axis] = 0; // Stop movement on other axes
             }
         }
+
+        if (this.id === 'player' && otherObject.id == 'glass') {
+            otherObject.isDynamic = true;
+        }
+
         if (this.id === 'player' && otherObject.isCollectible) {
             this.collectObject(otherObject);
+            this.mushroomCount++
+            console.log(this.mushroomCount)
         }
     }
 
