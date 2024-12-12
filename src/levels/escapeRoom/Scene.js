@@ -34,13 +34,24 @@ class Scene {
 
         // Create the raycaster to handle object interaction
         this.raycaster = new Raycaster(this.scene, this.camera, this.player.controls, this.room.interactiveOb);
+        const crosshair = document.getElementById('crosshair')
+        const crossParent = crosshair.parentElement
+        crossParent.removeChild(crosshair)
 
-        // const controls = new OrbitControls( this.camera, this.renderer.domElement );
+        setTimeout(() => {
+            this.loading = false;
+            crossParent.appendChild(crosshair)
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingParent = loadingScreen.parentElement;
+            loadingParent.removeChild(loadingScreen);
+        }, "7000");
     }
 
     update(deltaTime) {
+        if (this.loading) return;
         this.player.update(deltaTime);
-        this.raycaster.update(deltaTime);
+        var levelCompleted = this.raycaster.update(deltaTime);
+        return levelCompleted;
     }
 
     clear() {

@@ -66,7 +66,7 @@ class Player {
 
         // Check if the next position is outside the bounds or intersects with objects
         const outsideArea = this.playArea.every((box) => box.containsPoint(this.nextPos) === false);
-        const inObject = this.objectArea.some((box) => box.containsPoint(this.nextPos) === true);
+        const inObject = this.objectArea.slice(0, 7).some((box) => box.containsPoint(this.nextPos) === true);
 
         // If the player is inside the bounds and not colliding with objects, move them
         if (!outsideArea && !inObject) {
@@ -87,7 +87,7 @@ class Player {
         crosshair.style.transform = "translate(-50%, -50%)";
         crosshair.style.width = "25px";
         crosshair.style.height = "25px";
-        crosshair.style.backgroundImage = "url(EscapeRoomCrosshair.png)";
+        crosshair.style.backgroundImage = "url(/assets/textures/EscapeRoomCrosshair.png)";
         crosshair.style.backgroundSize = "contain";
         crosshair.style.backgroundRepeat = "no-repeat";
         crosshair.style.pointerEvents = "none";
@@ -130,7 +130,7 @@ class Player {
     }
 
     #keyup(event) {
-        if (!this.controls.isLocked) return; 
+        if (!this.controls.isLocked) return;
         switch (event.key) {
             case "w":
                 this.moveForward = false;
@@ -148,7 +148,7 @@ class Player {
     }
 
     #click() {
-        if (!this.controls.isLocked) this.controls.lock(); 
+        if (!this.controls.isLocked) this.controls.lock();
     }
 
     update(deltaTime) {
@@ -158,7 +158,7 @@ class Player {
         // Determine the player's movement direction
         this.camera.getWorldDirection(this.forward); // Forward direction
         // Prevent vertical movement
-        this.forward.y = 0; 
+        this.forward.y = 0;
 
         this.right.crossVectors(this.forward, this.up);
 
