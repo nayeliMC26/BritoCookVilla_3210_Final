@@ -4,15 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Final Project </title>
+    <title>Final Project</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- Main project script. -->
-    <script type="module" src="./src/core/main.js"></script>
+
+    <!-- UI for mushroom count -->
+    <div id="ui">
+        <img id="mushroom-icon" src="./textures/Mushroom.png" alt="Mushroom Icon">
+        <span id="mushroom-count">0</span>
+    </div>
+
+    <!-- Main project script -->
+    <script type="module" src="./src/core/Main.js"></script>
     <img src="/assets/textures/loadingScreen.png" height="100%" width="100%" id="loadingScreen">
 
+    <!-- End Screen -->
+    <div id="end-screen">
+        <h1>Game Over</h1>
+        <button id="restart-btn" onClick="window.location.reload();">Restart</button>
+    </div>
 </body>
 
 </html>

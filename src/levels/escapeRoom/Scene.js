@@ -4,6 +4,7 @@ import Player from './Player';
 import Raycaster from './Raycaster';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+
 class Scene {
     constructor(renderer) {
         this.renderer = renderer;

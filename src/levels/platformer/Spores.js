@@ -30,7 +30,7 @@ class Spores {
             spore.position.set(
                 900 + Math.random() * 500 - 250,   // Random x position around 900 (range -100 to +100)
                 Math.random() * 100 + 20,           
-                Math.random() * 200 - 100           
+                Math.random() * 50 - 25           
             );
     
             this.scene.add(spore);
