@@ -79,7 +79,7 @@ class AssetLoader {
     async loadAllAssets() {
         try {
             // Replace with asset paths
-            var mapSketch = this.loadTexture('./textures/map sketch.png');
+            var mapSketch = this.loadTexture('/assets/textures/map sketch.png');
             var modelPromise = this.loadGLTFModel('./models/wall.gltf')
 
             // Wait for all assets to load

@@ -18,6 +18,7 @@ class Game {
         this.inputHandler.keyboardControls();
 
         this.levelIndex = 0;
+        this.levelCompleted = false;
         // Create new levels
         this.levels = [new EscapeRoom(this.renderer), new Platformer(this.inputHandler), new Test()];
         // Switch/start with level 0 
@@ -50,27 +51,25 @@ class Game {
 
         // Add orbit controls for debugging
         // if (this.activeLevel.camera) {
-            // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
-            // this.controls.update();
+        // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
+        // this.controls.update();
         // }
     }
 
     update(deltaTime) {
 
         // Handle level switching
-        if (this.inputHandler.key1 && this.levelIndex !== 0) {
-            console.log('Switching to level 0');
-            this.switchLevel(0);
-        } else if (this.inputHandler.key2 && this.levelIndex !== 1) {
+
+        if (this.levelCompleted && this.levelIndex === 0) {
             console.log('Switching to level 1');
             this.switchLevel(1);
-        } else if (this.inputHandler.key3 && this.levelIndex !== 2 && this.levels[2]) {
+        } else if (this.levelCompleted && this.levelIndex === 1) {
             console.log('Switching to level 2');
             this.switchLevel(2);
         }
 
         if (this.activeLevel) {
-            this.activeLevel.update(deltaTime);
+            this.levelCompleted = this.activeLevel.update(deltaTime);
         }
     }
 

@@ -39,7 +39,8 @@ class Scene {
 
     update(deltaTime) {
         this.player.update(deltaTime);
-        this.raycaster.update(deltaTime);
+        var levelCompleted = this.raycaster.update(deltaTime);
+        return levelCompleted;
     }
 
     clear() {

@@ -17,7 +17,9 @@ class Raycaster {
         // Variables to track intercations
         this.action, this.states, this.completedPuzzle, this.message;
         // Variables to handle valve animations
-        this.animationState, this.rotation;
+        this.animationState, this.rotation, this.rotationCount;
+
+        this.winningArea;
 
         // Initialize mouse controls and setup
         this.#mouseControls();
@@ -41,13 +43,15 @@ class Raycaster {
             false, // Stairs
         ];
         // Puzzle completion states
-        this.completedPuzzle = [false, false, false, false];
+        this.completedPuzzle = [false, false, false];
         // Message State
         this.message = false;
         // Animation states for objects
         this.animationState = [false, false, false];
         // Tracks how much to rotate valves
         this.rotation = [0, 0, 0];
+        this.rotationCount = [0, 0, 0];
+        this.winningArea = new THREE.Box3().setFromObject(this.objects[11]);
     }
 
     /**
@@ -69,6 +73,7 @@ class Raycaster {
             case 0: // Middle button
                 if (this.completedPuzzle[0]) break;
                 this.#toggleButtonColor(0, 0x500000, 0xff0000);
+
                 break;
             case 1: // Left button
                 if (this.completedPuzzle[0]) break;
@@ -81,7 +86,9 @@ class Raycaster {
             case 3: // Exit button
                 if (!this.completedPuzzle[1] || this.completedPuzzle[2]) break;
                 this.#toggleButtonColor(3, 0x005050, 0x00ffff)
-                this.objects[8].visible = !this.objects[8].visible;
+                this.objects[11].visible = true;
+                this.objects[11].children[0].visible = true;
+                this.objects[11].geometry.computeBoundingBox();
                 break;
             case 4: // Middle pipe
                 if (!this.completedPuzzle[0] || this.completedPuzzle[1]) break;
@@ -95,19 +102,14 @@ class Raycaster {
                 if (!this.completedPuzzle[0] || this.completedPuzzle[1]) break;
                 this.#toggleValve(6);
                 break;
-            case 7: // Stairs
-                if (!this.completedPuzzle[2] || this.completedPuzzle[3]) break;
-                // Change this to ending game later
-                this.#toggleStairs(7);
-                break;
         }
         this.#updatePuzzles(); // Update puzzle states
 
         // Changes the message when the first puzzle is completed
         if (this.completedPuzzle[0] && !this.message) {
             this.message = true;
-            this.objects[9].material.color.set(0x505050)
-            this.objects[10].material.color.set(0x505050)
+            this.objects[12].material.color.set(0x505050)
+            this.objects[13].material.color.set(0x505050)
         }
         this.action = -1; // Reset action
     }
@@ -121,10 +123,13 @@ class Raycaster {
         for (let i = 0; i < this.animationState.length; i++) {
             this.rotation[i] = deltaTime;
             if (this.animationState[i]) {
-                this.#rotateValve(this.objects[i + 4], i);
+                this.#rotateValve(i);
             }
         }
         this.#highlightObjects(); // Handle object highlighting
+        if (this.completedPuzzle[2] && this.winningArea.containsPoint(this.camera.position)) {
+            return true;
+        }
     }
 
     /**
@@ -132,11 +137,12 @@ class Raycaster {
      * @param {THREE.Object3D} object - The valve object
      * @param {number} index - Index of the valve
      */
-    #rotateValve(object, index) {
-        const direction = this.states[index + 4] ? -1 : 1; // Direction based on state
-        const rotation = direction * this.rotation[index] * 5; // Rotation amount
-        object.rotation.z += rotation; // Apply rotation
-        this.animationState[index] = object.rotation.z > -Math.PI && object.rotation.z < 0;
+    #rotateValve(index) {
+        const rotation = -this.rotation[index] * 5; // Rotation amount
+        this.objects[index + 4].rotation.z += rotation; // Apply rotation
+        this.objects[index + 8].rotation.z += rotation; // Apply rotation
+        // console.log(object);
+        this.animationState[index] = (this.objects[index + 4].rotation.z > ((-Math.PI / 2) * this.rotationCount[index]))
     }
 
     /**
@@ -170,10 +176,16 @@ class Raycaster {
      * Updates the state of puzzles based on current interactions
      */
     #updatePuzzles() {
+        // Check if all button are on the correct letter
         this.completedPuzzle[0] = this.states[0] && this.states[1] && this.states[2];
+        // Checking roattion of the L's
+        this.states[4] = ((this.rotationCount[0] + 3) % 4 === 0);
+        this.states[5] = ((this.rotationCount[1] + 2) % 4 === 0);
+        this.states[6] = ((this.rotationCount[2] + 1) % 4 === 0);
+        // Checking if all are correct
         this.completedPuzzle[1] = this.states[4] && this.states[5] && this.states[6];
+        // Checking if exit button was pressed
         this.completedPuzzle[2] = this.states[3];
-        this.completedPuzzle[3] = this.states[7];
     }
 
     /**
@@ -187,16 +199,19 @@ class Raycaster {
         this.objects[index].material.color.set(this.states[index] ? activeColor : inactiveColor);
         // Adjust for highlight
         this.objects[index].material.color.addScalar(0.2);
+        if (index === 3) return;
+        this.objects[index + 14].changeText();
     }
 
     /**
      * Toggles the state of a valve and sets it for animation
-     * @param {number} stateIndex - Index of the pipe state
-     * @param {number} animationIndex - Index of the animation state
+     * @param {number} index - Index of the pipe
      */
-    #toggleValve(stateIndex) {
-        this.states[stateIndex] = !this.states[stateIndex];
-        this.animationState[stateIndex - 4] = true;
+    #toggleValve(index) {
+        console.log(index)
+        this.states[index] = !this.states[index];
+        this.rotationCount[index - 4]++;
+        this.animationState[index - 4] = true;
     }
 
     /**
@@ -222,7 +237,7 @@ class Raycaster {
             if (!this.controls.isLocked) return;
             this.camera.getWorldDirection(this.direction);
             this.raycaster.set(this.camera.position, this.direction);
-            this.intersections = this.raycaster.intersectObjects(this.objects.slice(0, 8));
+            this.intersections = this.raycaster.intersectObjects(this.objects.slice(0, 7));
         });
     }
 }
