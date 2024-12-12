@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import PhysicsObject from '../../../levels/platformer/utils/PhysicsObject';
 
 class Platform {
-    constructor(scene, x, y, z, width, height, depth, physicsEngine, id, minY = null, maxY = null, speed = 0) {
+    constructor(scene, x, y, z, width, height, depth, physicsEngine, id, minY = null, maxY = null, speed = 0, texturePath = null) {
         this.scene = scene;
         this.position = new THREE.Vector3(x, y, z);
         this.size = new THREE.Vector3(width, height, depth);
@@ -14,8 +14,8 @@ class Platform {
         this.speed = speed; 
         this.direction = 1;
 
-        // Create the platform mesh
-        this.mesh = this.createPlatformMesh();
+        // Create the platform mesh with texture
+        this.mesh = this.createPlatformMesh(texturePath);
 
         // Create the physics object for the platform (static)
         this.physicsObject = new PhysicsObject(this.scene, this.mesh, false, false, id);
@@ -25,9 +25,22 @@ class Platform {
     }
 
     /* A function to create the visual representation of our physics body */
-    createPlatformMesh() {
+    createPlatformMesh(texturePath) {
         var geometry = new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z);
-        var material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+
+        let material;
+        if (texturePath) {
+            // Load the texture
+            const textureLoader = new THREE.TextureLoader();
+            const texture = textureLoader.load(texturePath);
+
+            // Create a material with the loaded texture
+            material = new THREE.MeshPhongMaterial({ map: texture });
+        } else {
+            // Default material if no texture is provided
+            material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+        }
+
         var mesh = new THREE.Mesh(geometry, material);
         mesh.position.copy(this.position);
         mesh.castShadow = true;

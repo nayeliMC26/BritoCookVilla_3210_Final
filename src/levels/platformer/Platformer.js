@@ -7,25 +7,32 @@ import AssetLoader from '../../levels/platformer/utils/AssetLoader.js';
 import Spores from './Spores';
 import Mushrooms from './entities/Mushrooms.js';
 import Lever from './entities/Lever.js';
+import playerData from './utils/playerData.js';
 
 class Platformer {
     constructor(inputHandler) {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 3000);
-        this.camera.position.set(0, 10, 60);
+        this.camera.position.set(30, 10, 65);
 
         this.inputHandler = inputHandler;
         this.clock = new THREE.Clock();
         this.assetLoader = new AssetLoader();
         this.physicsEngine = new PhysicsEngine(this.scene);
         this.platforms = [];
+        this.gameOver = false;
 
         this.loadAssets();
+
+        this.gameOverCameraStartX = this.camera.position.x;
+        this.gameOverCameraEndX = 1920; // The end of the scene (or a designated far point)
+        this.gameOverDuration = 3000; // Time in milliseconds for the pan
+        this.startTime = null;
     }
 
     init() {
         this.player = new Player(this.scene, this.inputHandler, this.physicsEngine);
-                this.camera.lookAt(this.player.mesh.position)
+        this.camera.lookAt(this.player.mesh.position)
 
 
         this.addFog();
@@ -68,10 +75,11 @@ class Platformer {
 
     addLights() {
         // Add ambient light
-        var ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
-        this.scene.add(ambientLight);
+        this.ambientLight = new THREE.AmbientLight(0xffffff);
+        this.ambientLight.intensity = 0.2;
+        this.scene.add(this.ambientLight);
 
-        var spotlights = [
+        this.spotlights = [
             { x: 350, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 20000, target: { x: 250, y: 0, z: 10 }, withCone: false },
             { x: 250, y: 200, z: 10, color: 0xffa21d, angle: Math.PI / 16, intensity: 20000, target: { x: 100, y: 0, z: 10 }, withCone: false },
             { x: 900, y: 200, z: 30, color: 0x78eeff, angle: Math.PI / 16, intensity: 35000, target: { x: 900, y: 0, z: 30 }, withCone: true },
@@ -83,7 +91,7 @@ class Platformer {
         ];
 
         // Add spotlights to the scene
-        spotlights.forEach(({ x, y, z, color, angle, intensity, target, withCone }) => {
+        this.spotlights.forEach(({ x, y, z, color, angle, intensity, target, withCone }) => {
             var spotlight = new THREE.SpotLight(color, intensity);
             spotlight.angle = angle;
             spotlight.penumbra = 0.5;
@@ -191,6 +199,8 @@ class Platformer {
 
 
     addDynamicBoxes() {
+        var textureLoader = new THREE.TextureLoader();
+        var texturePath = './textures/Crate.png';
         var positions = [
             // { x: 420, y: 5, z: 10, width: 20, height: 15, depth: 15 },
             // { x: 535, y: 5, z: 10, width: 20, height: 15, depth: 15 },
@@ -204,7 +214,8 @@ class Platformer {
         positions.forEach((pos) => {
             var boxGeometry = new THREE.BoxGeometry(pos.width, pos.height, pos.depth);
             var boxMaterial = new THREE.MeshPhongMaterial({
-                color: 0x00ffff,
+                map: textureLoader.load(texturePath),
+                color: 0xb9874e,
                 shininess: 90, specular: 0xffffff
             });
 
@@ -218,6 +229,8 @@ class Platformer {
     }
 
     addStaticBoxes() {
+        var textureLoader = new THREE.TextureLoader();
+        var texturePath = './textures/Crate.png';
         var positions = [
             { x: 225, y: 5, z: 10, width: 15, height: 15, depth: 15 },
             { x: 240, y: 10, z: 10, width: 15, height: 25, depth: 15 },
@@ -228,7 +241,8 @@ class Platformer {
         positions.forEach((pos) => {
             var boxGeometry = new THREE.BoxGeometry(pos.width, pos.height, pos.depth);
             var boxMaterial = new THREE.MeshPhongMaterial({
-                color: 0x00ffff,
+                map: textureLoader.load(texturePath),
+                color: 0x7e5210,
                 shininess: 90, specular: 0xffffff
             });
 
@@ -242,6 +256,7 @@ class Platformer {
     }
 
     addPlatforms() {
+        var texturePath = './textures/metallic/Metal062C_1K-JPG_Color.jpg';
         var positions = [
             { x: 170, y: 15, z: 10, width: 70, height: 1, depth: 20, minY: 10, maxY: 30, speed: 0.25 },
             { x: 283.5, y: 35, z: 10, width: 50, height: 1, depth: 20, minY: 25, maxY: 45, speed: 0.25 },
@@ -262,7 +277,8 @@ class Platformer {
                 'platform',
                 pos.minY,
                 pos.maxY,
-                pos.speed
+                pos.speed,
+                texturePath
             );
 
             platform.mesh.castShadow = true;
@@ -355,6 +371,7 @@ class Platformer {
         this.physicsEngine.update(deltaTime);
         this.scene.fog.density = 0.0005 + (this.player.mesh.position.x / 96000);
         this.updateCamera();
+        this.updateLights();
         if (this.player.mesh.position.x > 415 && this.player.mesh.position.x < 435) {
             this.lever.update();
             this.lever.displayInstruction(this.player.mesh)
@@ -368,12 +385,35 @@ class Platformer {
         this.platforms.forEach(platform => {
             platform.update(); // Update movement for platforms with minY, maxY, and speed
         });
+
+        // Check for end game condition
+        if (playerData.mushroomCount === 5) {
+            this.gameOver = true;
+        }
     }
 
     updateCamera() {
-        this.camera.position.x = this.player.mesh.position.x;
-        this.camera.position.y = this.player.mesh.position.y + 10;
+        // Check if the game is over before panning the camera
+        if (this.gameOver === true) {
+            this.camera.position.y = 15;
+            var panSpeed = 15; // Adjust the speed of the pan
+            var targetX = Math.max(30, this.camera.position.x - panSpeed); // Stop the camera at x: 30
+            this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, targetX, 0.1); // Adjust the lerp factor for slower movement
+        } else {
+            this.camera.position.x = this.player.mesh.position.x;
+            this.camera.position.y = this.player.mesh.position.y + 10;
+        }
     }
+
+    updateLights(){
+            if(this.gameOver === true){
+                this.ambientLight.intensity = THREE.MathUtils.lerp(this.ambientLight.intensity, 2, 0.1)
+                for (var spotlight of this.spotlights){
+                    spotlight.intensity = THREE.MathUtils.lerp(spotlight.intensity, 750000, 10000)
+                }
+            }
+    }
+    
 
     render(renderer) {
         renderer.render(this.scene, this.camera);

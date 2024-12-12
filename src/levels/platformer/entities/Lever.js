@@ -16,7 +16,8 @@ class Lever extends THREE.Group {
 
         // Lever Arm
         var leverGeometry = new THREE.BoxGeometry(1.5, 7.5, 1.5);
-        this.lever = new THREE.Mesh(leverGeometry, baseMaterial);
+        var leverMaterial = new THREE.MeshPhongMaterial({ color: 0x272727 });
+        this.lever = new THREE.Mesh(leverGeometry, leverMaterial);
         this.lever.castShadow = true;
         this.lever.receiveShadow = true;
         this.lever.rotation.set(-65, 0, 0);
@@ -46,7 +47,7 @@ class Lever extends THREE.Group {
         var playerPosition = player.position;
         var distance = leverPosition.distanceTo(playerPosition);
 
-        if (distance < 5) {
+        if (distance < 10) {
             this.messageElement.textContent = "Press 'E' to interact with the lever";
             this.messageElement.style.display = 'block'; // Show message
         } else {

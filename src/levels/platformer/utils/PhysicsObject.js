@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import playerData from './playerData';
+
 /* A class for physics object that can be added to the physics engine */
 class PhysicsObject {
     // Physics objects can be either static or dynamic
@@ -23,9 +25,14 @@ class PhysicsObject {
 
         // Create Box3Helper to visualize the bounding box
         this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xff0000);
-        this.scene.add(this.boundingBoxHelper);
+        //this.scene.add(this.boundingBoxHelper);
 
         this.mushroomCount = 0;
+
+        // UI Element for displaying the count (Add this)
+        this.uiElement = document.getElementById("mushroom-count");
+
+        this.endGameTriggered = false; 
     }
 
     updateBoundingBox() {
@@ -65,7 +72,7 @@ class PhysicsObject {
      * @param {PhysicsObject} otherObject 
      */
     resolveCollision(otherObject) {
-        if (!this.checkCollision(otherObject)) return;  
+        if (!this.checkCollision(otherObject)) return;
         // Calculate the differences in positions along each axis
         var dx = this.position.x - otherObject.position.x;
         var dy = this.position.y - otherObject.position.y;
@@ -122,7 +129,7 @@ class PhysicsObject {
             // Dynamic object collides with another dynamic object
             this.position[axis] += direction * (overlap / 2);
             otherObject.position[axis] -= direction * (overlap / 2);
-            
+
             if (axis === 'y') {
                 this.velocity[axis] = 0;
                 otherObject.velocity[axis] = 0;
@@ -134,7 +141,7 @@ class PhysicsObject {
             // Player collides with a dynamic object
             this.position[axis] += direction * overlap;
             otherObject.position[axis] -= direction * overlap;
-            
+
             if (axis === 'y') {
                 this.velocity[axis] = 0;
                 otherObject.velocity[axis] = 0;
@@ -159,7 +166,11 @@ class PhysicsObject {
         if (this.id === 'player' && otherObject.isCollectible) {
             this.collectObject(otherObject);
             this.mushroomCount++
-            console.log(this.mushroomCount)
+            playerData.mushroomCount++
+            console.log(playerData.mushroomCount)
+
+
+            this.uiElement.textContent = `${this.mushroomCount} / 5`;
         }
     }
 
