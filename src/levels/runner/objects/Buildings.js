@@ -60,35 +60,65 @@ class Buildings extends Group {
                         const wallModel2 = wallGltf2.scene;
                         this.applyEmissiveMaterial(wallModel2);
 
-                        // Create 10 buildings (ground + walls)
-                        for (let i = 0; i < 10; i++) {
-                            const groundClone = groundModel.clone();
-                            groundClone.scale.set(10, 1, 7);
-                            groundClone.position.set(i * 10, 0, 0);
+                        this.loader.load(
+                            "../models/windowCollection3.glb",
+                            (wallGltf3) => {
+                                const wallModel3 = wallGltf3.scene;
+                                this.applyEmissiveMaterial(wallModel3);
 
-                            // Add puddles to the ground
-                            this.addPuddles(groundClone);
+                                this.loader.load(
+                                    "../models/windowCollection4.glb",
+                                    (wallGltf4) => {
+                                        const wallModel4 = wallGltf4.scene;
+                                        this.applyEmissiveMaterial(wallModel4);
 
-                            const wallClone =
-                                Math.random() > 0.5
-                                    ? wallModel1.clone()
-                                    : wallModel2.clone();
-                            wallClone.scale.set(0.49, 3, 1);
-                            wallClone.position.set(0, -4, -0.4);
+                                        // Create 10 buildings (ground + walls)
+                                        for (let i = 0; i < 10; i++) {
+                                            const groundClone =
+                                                groundModel.clone();
+                                            groundClone.scale.set(10, 1, 7);
+                                            groundClone.position.set(
+                                                i * 10,
+                                                0,
+                                                0
+                                            );
 
-                            groundClone.add(wallClone);
+                                            // Add puddles to the ground
+                                            this.addPuddles(groundClone);
 
-                            this.pool.push(groundClone);
-                        }
+                                            const wallClone =
+                                                this.getRandomWallClone(
+                                                    wallModel1,
+                                                    wallModel2,
+                                                    wallModel3,
+                                                    wallModel4
+                                                );
+                                            wallClone.scale.set(0.49, 3, 1);
+                                            wallClone.position.set(0, -4, -0.4);
 
-                        // Add 10 buildings to the scene after everything is loaded
-                        for (let i = 0; i < 10; i++) {
-                            this.addBuilding();
-                        }
+                                            groundClone.add(wallClone);
+
+                                            this.pool.push(groundClone);
+                                        }
+
+                                        // Add 10 buildings to the scene after everything is loaded
+                                        for (let i = 0; i < 10; i++) {
+                                            this.addBuilding();
+                                        }
+                                    }
+                                );
+                            }
+                        );
                     }
                 );
             });
         });
+    }
+
+    getRandomWallClone(wallModel1, wallModel2, wallModel3, wallModel4) {
+        const walls = [wallModel1, wallModel2, wallModel3, wallModel4];
+        const randomIndex = Math.floor(Math.random() * walls.length);
+        return walls[randomIndex].clone();
     }
 
     addPuddles(groundModel) {
@@ -97,6 +127,7 @@ class Buildings extends Group {
             metalness: 0.9, // High reflectivity
             roughness: 0.0, // Very smooth surface
             transparent: true, // Allow slight transparency
+            alphaTest: true,
             opacity: 0.2, // Slightly transparent
             depthWrite: true,
             depthTest: true,
@@ -138,6 +169,10 @@ class Buildings extends Group {
                 child.material = new MeshStandardMaterial({
                     map: existingMaterial.map, // Base texture
                     color: existingMaterial.color, // Base color
+                    alphaTest: true,
+                    transparent: true,
+                    depthTest: true,
+                    depthWrite: true,
                 });
             }
 
