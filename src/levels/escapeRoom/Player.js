@@ -87,7 +87,7 @@ class Player {
         crosshair.style.transform = "translate(-50%, -50%)";
         crosshair.style.width = "25px";
         crosshair.style.height = "25px";
-        crosshair.style.backgroundImage = "url(EscapeRoomCrosshair.png)";
+        crosshair.style.backgroundImage = "url(/assets/textures/EscapeRoomCrosshair.png)";
         crosshair.style.backgroundSize = "contain";
         crosshair.style.backgroundRepeat = "no-repeat";
         crosshair.style.pointerEvents = "none";

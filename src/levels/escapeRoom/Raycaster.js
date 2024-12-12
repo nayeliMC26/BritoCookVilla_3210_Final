@@ -84,7 +84,7 @@ class Raycaster {
                 this.#toggleButtonColor(2, 0x000050, 0x0000ff);
                 break;
             case 3: // Exit button
-                if (!this.completedPuzzle[1] || this.completedPuzzle[2]) break;
+                // if (!this.completedPuzzle[1] || this.completedPuzzle[2]) break;
                 this.#toggleButtonColor(3, 0x005050, 0x00ffff)
                 this.objects[11].visible = true;
                 this.objects[11].children[0].visible = true;
@@ -126,7 +126,7 @@ class Raycaster {
                 this.#rotateValve(i);
             }
         }
-        this.#highlightObjects(); // Handle object highlighting
+        // this.#highlightObjects(); // Handle object highlighting
         if (this.completedPuzzle[2] && this.winningArea.containsPoint(this.camera.position)) {
             return true;
         }
