@@ -57,7 +57,6 @@ class Player {
         this.bindedKeydown = this.#keydown.bind(this);
         this.bindedKeyup = this.#keyup.bind(this);
         this.bindedClick = this.#click.bind(this);
-
     }
 
     #handleAreaCollision() {
@@ -65,8 +64,12 @@ class Player {
         this.nextPos.add(this.moveDirection);
 
         // Check if the next position is outside the bounds or intersects with objects
-        const outsideArea = this.playArea.every((box) => box.containsPoint(this.nextPos) === false);
-        const inObject = this.objectArea.some((box) => box.containsPoint(this.nextPos) === true);
+        const outsideArea = this.playArea.every(
+            (box) => box.containsPoint(this.nextPos) === false
+        );
+        const inObject = this.objectArea.some(
+            (box) => box.containsPoint(this.nextPos) === true
+        );
 
         // If the player is inside the bounds and not colliding with objects, move them
         if (!outsideArea && !inObject) {
@@ -96,7 +99,9 @@ class Player {
 
     #removeCrosshair() {
         const crosshair = document.getElementById("crosshair");
-        document.body.removeChild(crosshair);
+        if (crosshair && crosshair.parentNode) {
+            document.body.removeChild(crosshair);
+        }
     }
 
     #addEventListener() {
@@ -130,7 +135,7 @@ class Player {
     }
 
     #keyup(event) {
-        if (!this.controls.isLocked) return; 
+        if (!this.controls.isLocked) return;
         switch (event.key) {
             case "w":
                 this.moveForward = false;
@@ -148,7 +153,7 @@ class Player {
     }
 
     #click() {
-        if (!this.controls.isLocked) this.controls.lock(); 
+        if (!this.controls.isLocked) this.controls.lock();
     }
 
     update(deltaTime) {
@@ -158,7 +163,7 @@ class Player {
         // Determine the player's movement direction
         this.camera.getWorldDirection(this.forward); // Forward direction
         // Prevent vertical movement
-        this.forward.y = 0; 
+        this.forward.y = 0;
 
         this.right.crossVectors(this.forward, this.up);
 
@@ -182,7 +187,12 @@ class Player {
         this.#handleAreaCollision();
 
         // Add bobbing effect while moving
-        if (this.moveForward || this.moveBackward || this.moveLeft || this.moveRight) {
+        if (
+            this.moveForward ||
+            this.moveBackward ||
+            this.moveLeft ||
+            this.moveRight
+        ) {
             this.bobCounter += 10 * deltaTime;
             this.bobCounter %= Math.PI * 2; // Keep bobCounter within one full cycle
             this.camera.position.y += Math.sin(this.bobCounter) / 16; // Bobbing effect

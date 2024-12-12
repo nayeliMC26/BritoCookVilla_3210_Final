@@ -6,7 +6,6 @@ import Platformer from "../levels/platformer/Platformer.js";
 import EscapeRoom from "../levels/escapeRoom/Scene.js";
 import Runner from "../levels/runner/scenes/MainScene.js";
 
-
 class Game {
     constructor(renderer) {
         // Renderer will be passed in from main
@@ -23,6 +22,7 @@ class Game {
         this.inputHandler.keyboardControls();
 
         this.levelIndex = 0;
+        this.levelCompleted = false;
         // Create new levels
         this.levels = [
             new EscapeRoom(this.renderer),
@@ -61,6 +61,12 @@ class Game {
         if (this.activeLevel instanceof Runner) {
             this.activeLevel.start(); // Start the Runner game when it becomes active
         }
+
+        // Add orbit controls for debugging
+        // if (this.activeLevel.camera) {
+        // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
+        // this.controls.update();
+        // }
     }
 
     update(deltaTime) {
@@ -96,9 +102,12 @@ class Game {
             // Render active level scene
             if (this.activeLevel) {
                 if (this.activeLevel instanceof Runner) {
-                    this.activeLevel.render();  // Render with bloom for the Runner level
+                    this.activeLevel.render(); // Render with bloom for the Runner level
                 } else {
-                    this.renderer.render(this.activeLevel.scene, this.activeLevel.camera);  // Regular render for other levels
+                    this.renderer.render(
+                        this.activeLevel.scene,
+                        this.activeLevel.camera
+                    ); // Regular render for other levels
                 }
             }
 

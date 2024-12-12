@@ -52,6 +52,18 @@ body {
     /* align-items: center; Center-align children horizontally */
 }
 
+#startup-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
 #end-screen h1 {
     font-size: 2rem;
     margin-bottom: 1.5rem; /* Space below the heading */
@@ -71,5 +83,4 @@ body {
 
 #restart-btn:hover {
     background: #d84343;
-
 }

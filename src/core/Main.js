@@ -1,6 +1,6 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 import Stats from "three/examples/jsm/libs/stats.module.js";
-import Game from '../core/Game.js';
+import Game from "../core/Game.js";
 
 /* Entry point for the app */
 class Main {
@@ -17,16 +17,24 @@ class Main {
         this.stats = new Stats();
         document.body.appendChild(this.stats.dom);
         // Initialize the Game instance
-        this.game = new Game(this.renderer); 
+        this.game = new Game(this.renderer);
 
         // Start game loop
         this.game.start();
 
-        this.clock = new THREE.Clock();;
+        this.clock = new THREE.Clock();
 
         // Handle window resizing
 
-        window.addEventListener('resize', this.onResize.bind(this));
+        window.addEventListener("resize", this.onResize.bind(this));
+
+        // Automatically hide the startup message after 3 seconds
+        setTimeout(() => {
+            const startupMessage = document.getElementById("startup-message");
+            if (startupMessage) {
+                startupMessage.style.display = "none";
+            }
+        }, 3000);
     }
 
     onResize() {
@@ -43,9 +51,7 @@ class Main {
         this.escapeRoom.render(time / 1000, deltaTime);
         this.stats.end();
         requestAnimationFrame(this.animation.bind(this));
-
     }
-
 }
 // App entry
 new Main();
