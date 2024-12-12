@@ -1,9 +1,8 @@
-import * as THREE from 'three';
-import Room from './Room';
-import Player from './Player';
-import Raycaster from './Raycaster';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+import * as THREE from "three";
+import Room from "./Room";
+import Player from "./Player";
+import Raycaster from "./Raycaster";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 class Scene {
     constructor(renderer) {
@@ -18,33 +17,41 @@ class Scene {
         this.scene = new THREE.Scene();
 
         // Set up a perspective camera
-        this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(
+            65,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
 
         // Position the camera at a specific spawn location
         this.camera.position.set(230, 65, 170);
 
-        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
         this.scene.add(this.ambientLight);
 
         // Create the room object and add it to the scene
         this.room = new Room(this.scene);
 
         // Create the player object, passing the scene, camera, and bounding boxes
-        this.player = new Player(this.scene, this.camera, this.room.areaBB, this.room.objectsBB);
+        this.player = new Player(
+            this.scene,
+            this.camera,
+            this.room.areaBB,
+            this.room.objectsBB
+        );
 
         // Create the raycaster to handle object interaction
-        this.raycaster = new Raycaster(this.scene, this.camera, this.player.controls, this.room.interactiveOb);
-        const crosshair = document.getElementById('crosshair')
-        const crossParent = crosshair.parentElement
-        crossParent.removeChild(crosshair)
+        this.raycaster = new Raycaster(
+            this.scene,
+            this.camera,
+            this.player.controls,
+            this.room.interactiveOb
+        );
+        const crosshair = document.getElementById("crosshair");
+        const crossParent = crosshair.parentElement;
+        crossParent.removeChild(crosshair);
 
-        setTimeout(() => {
-            this.loading = false;
-            crossParent.appendChild(crosshair)
-            const loadingScreen = document.getElementById('loadingScreen');
-            const loadingParent = loadingScreen.parentElement;
-            loadingParent.removeChild(loadingScreen);
-        }, "7000");
     }
 
     update(deltaTime) {
@@ -55,7 +62,7 @@ class Scene {
     }
 
     clear() {
-        console.log('Clearing the scene...');
+        console.log("Clearing the scene...");
 
         // Dispose geometries and materials of objects in the scene
         this.scene.children.forEach((object) => {
@@ -90,7 +97,7 @@ class Scene {
         this.player.controls = null;
         this.player = null;
 
-        console.log('Scene cleared.');
+        console.log("Scene cleared.");
     }
 
     #removeMesh(object) {
