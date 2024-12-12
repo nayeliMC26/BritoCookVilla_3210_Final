@@ -19,7 +19,7 @@ class Renderer {
     }
 
     render(scene, camera) {
-        this.renderer.render(scene, camera);
+        this.composer.render(scene, camera);
     }
 
     resize() {
