@@ -95,10 +95,11 @@ class Game {
 
             // Render active level scene
             if (this.activeLevel) {
-                this.renderer.render(
-                    this.activeLevel.scene,
-                    this.activeLevel.camera
-                );
+                if (this.activeLevel instanceof Runner) {
+                    this.activeLevel.render();  // Render with bloom for the Runner level
+                } else {
+                    this.renderer.render(this.activeLevel.scene, this.activeLevel.camera);  // Regular render for other levels
+                }
             }
 
             // Request the next frame

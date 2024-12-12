@@ -1,10 +1,19 @@
-html,
-body {
+* {
     margin: 0;
     padding: 0;
-    height: 100%;
-    width: 100%;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #28283d);
+    color: #fff;
+    height: 100vh;
+    display: flex; /* Flexbox for centering */
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Centers content vertically */
     overflow: hidden;
+
     position: relative;
 }
 
@@ -24,4 +33,44 @@ body {
     width: 32px;
     height: 32px;
     margin-right: 10px;
+=======
+}
+
+#end-screen {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+
+    /* Flexbox for centering content inside #end-screen */
+    /* display: flex; */
+    /* flex-direction: column; Stack children vertically */
+    /* align-items: center; Center-align children horizontally */
+}
+
+#end-screen h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem; /* Space below the heading */
+    color: #f05454;
+}
+
+#restart-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    color: #fff;
+    background: #f05454;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#restart-btn:hover {
+    background: #d84343;
+
 }
