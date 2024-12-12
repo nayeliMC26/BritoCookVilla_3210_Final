@@ -11,7 +11,7 @@ import GlowingParticles from "../shaders/GlowingParticles.js";
 import Background from "../objects/Background.js";
 import Obstacles from "../objects/Obstacles.js";
 import Fabric from "../shaders/Fabric.js";
-import SplashEffect from "../shaders/SplashEffect.js";
+import Skyscrapers from "../objects/Skyscrapers.js";
 
 class MainScene {
     constructor(renderer) {
@@ -25,6 +25,7 @@ class MainScene {
         this.player = new Player(this.scene);
         this.buildings = new Buildings();
         this.obstacles = new Obstacles();
+        this.skyscrapers = new Skyscrapers(this.scene);
 
         this.scene.add(this.obstacles);
 
@@ -75,11 +76,6 @@ class MainScene {
         this.rain = new RainEffect(this.scene);
         this.glowingParticles = new GlowingParticles(this.scene);
         this.fabric = new Fabric(this.scene);
-        this.splashEffect = new SplashEffect(this.scene);
-
-        this.buildings.children.forEach((building) => {
-            this.splashEffect.registerObjectForSplash(building);
-        });
 
         // Initialize post-processing
         this.setupComposer();
@@ -182,9 +178,7 @@ class MainScene {
             this.player.update(deltaTime);
             this.buildings.update(deltaTime);
             this.obstacles.update(deltaTime);
-
-            // Update the splash effect system
-            this.splashEffect.update(deltaTime);
+            this.skyscrapers.update(deltaTime);
 
             const isJumping = this.player.isJumping;
             const isSliding = this.player.isSliding;
