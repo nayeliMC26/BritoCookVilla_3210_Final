@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import Text from './Text.js';
+import AssetLoader from './EscapeRoomAssetLoader.js';
+
 
 class Room {
     constructor(scene) {
@@ -14,7 +16,9 @@ class Room {
         this.buttons, this.text;
         this.staircase, this.exitBorder;
         this.lights;
+        this.textures;
         this.fontLoader;
+        this.textureLoader;
         this.assetLoader;
 
         this.interactiveOb;
@@ -25,6 +29,7 @@ class Room {
         this.#roomSetUp();
         this.#addObjects();
         this.#setUpBoundignBoxes();
+
     }
 
     #init() {
@@ -37,12 +42,17 @@ class Room {
         this.interactiveOb = [];
         this.areaBB = [];
         this.objectsBB = [];
+        this.textures = [];
         this.fontLoader = new FontLoader();
         this.textureLoader = new THREE.TextureLoader();
+        this.assetLoader = new AssetLoader();
+
+        this.concrete = new THREE.MeshStandardMaterial({ color: 0x808080 });
 
     }
 
     #roomSetUp() {
+        console.log("second")
 
         var textures = [];
         textures[0] = this.textureLoader.load('/assets/textures/grainy-concrete-bl/grainy-concrete_albedo.png');
@@ -52,14 +62,15 @@ class Room {
 
         // Floor setup
         var geometry = new THREE.PlaneGeometry(300, 220);
-        var material = new THREE.MeshStandardMaterial({
+        this.concrete = new THREE.MeshStandardMaterial({
             color: 0x808080,
             map: textures[0],
             roughnessMap: textures[1],
             metalnessMap: textures[2],
             aoMap: textures[3],
         });
-        this.floor = new THREE.Mesh(geometry, material);
+        this.floor = new THREE.Mesh(geometry, this.concrete);
+
         this.floor.rotateX(-Math.PI / 2);
         this.floor.position.set(150, 0, 110);
         this.floor.receiveShadow = true;
@@ -73,39 +84,51 @@ class Room {
         this.ceilling.receiveShadow = true;
         this.scene.add(this.ceilling);
 
+        textures[0] = this.textureLoader.load('/assets/textures/harshbricks-bl/harshbricks-albedo.png');
+        textures[1] = this.textureLoader.load('/assets/textures/harshbricks-bl/harshbricks-roughness.png');
+        textures[2] = this.textureLoader.load('/assets/textures/harshbricks-bl/harshbricks-normal.png');
+        textures[3] = this.textureLoader.load('/assets/textures/harshbricks-bl/harshbricks-ao2.png');
+
         this.walls = [];
         geometry = new THREE.PlaneGeometry(100, 100);
-        material = new THREE.MeshStandardMaterial({ color: 0x909090, side: THREE.DoubleSide });
-        this.walls[0] = new THREE.Mesh(geometry, material);
+        this.bricks = new THREE.MeshStandardMaterial({
+            color: 0x909090,
+            side: THREE.DoubleSide,
+            map: textures[0],
+            roughnessMap: textures[1],
+            normalMap: textures[2],
+            aoMap: textures[3]
+        });
+        this.walls[0] = new THREE.Mesh(geometry, this.bricks);
         this.walls[0].rotateY(Math.PI / 2);
         this.walls[0].position.set(0, 50, 170);
 
         geometry = new THREE.PlaneGeometry(300, 100);
-        this.walls[1] = new THREE.Mesh(geometry, material);
+        this.walls[1] = new THREE.Mesh(geometry, this.bricks);
         this.walls[1].position.set(150, 50, 220);
 
         geometry = new THREE.PlaneGeometry(220, 100);
-        this.walls[2] = new THREE.Mesh(geometry, material);
+        this.walls[2] = new THREE.Mesh(geometry, this.bricks);
         this.walls[2].rotateY(Math.PI / 2);
         this.walls[2].position.set(300, 50, 110);
 
         geometry = new THREE.PlaneGeometry(140, 100);
-        this.walls[3] = new THREE.Mesh(geometry, material);
+        this.walls[3] = new THREE.Mesh(geometry, this.bricks);
         this.walls[3].position.set(230, 50, 0);
 
         geometry = new THREE.PlaneGeometry(120, 100);
-        this.walls[4] = new THREE.Mesh(geometry, material);
+        this.walls[4] = new THREE.Mesh(geometry, this.bricks);
         this.walls[4].rotateY(Math.PI / 2);
         this.walls[4].position.set(160, 50, 60);
 
         geometry = new THREE.PlaneGeometry(160, 100);
-        this.walls[5] = new THREE.Mesh(geometry, material);
+        this.walls[5] = new THREE.Mesh(geometry, this.bricks);
         this.walls[5].position.set(80, 50, 120);
         this.scene.add(...this.walls);
 
         // Entrace setup
         geometry = new THREE.PlaneGeometry(60, 60);
-        material = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        var material = new THREE.MeshStandardMaterial({ color: 0x000000 });
         this.entrance = new THREE.Mesh(geometry, material);
         this.entrance.rotateX(Math.PI / 2);
         this.entrance.position.set(230, 99.9, 170);
@@ -123,7 +146,7 @@ class Room {
         this.exit.visible = false;
         this.exitBorder.add(this.exit);
         this.scene.add(this.exitBorder);
-        // this.scene.add(this.exit);
+
 
     }
 
@@ -131,7 +154,13 @@ class Room {
 
         // Table setup
         var geometry = new THREE.BoxGeometry(50, 30, 25);
-        var material = new THREE.MeshStandardMaterial({ color: 0x606060 });
+        var material = new THREE.MeshStandardMaterial({
+            color: 0x606060,
+            map: this.textureLoader.load('/assets/textures/agedplanks1-bl/agedplanks1-albedo.png'),
+            roughnessMap: this.textureLoader.load('/assets/textures/agedplanks1-bl/agedplanks1-roughness.png'),
+            normalMap: this.textureLoader.load('/assets/textures/agedplanks1-bl/agedplanks1-normal4-ogl.png'),
+            aoMap: this.textureLoader.load('/assets/textures/agedplanks1-bl/agedplanks1-ao.png'),
+        });
         this.table = new THREE.Mesh(geometry, material);
         this.table.rotateY(-Math.PI / 2);
         this.table.position.set(287.5, 15, 60);
@@ -141,7 +170,10 @@ class Room {
 
         // Letter setup
         geometry = new THREE.PlaneGeometry(9, 14);
-        material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        material = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            map: this.textureLoader.load('/assets/textures/swj.png')
+        });
         this.letter = new THREE.Mesh(geometry, material);
         this.letter.rotateX(-Math.PI / 2);
         this.letter.rotateZ(-Math.PI / 2);
@@ -153,7 +185,10 @@ class Room {
 
         // Alphabet setup
         geometry = new THREE.PlaneGeometry(18, 24);
-        material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        material = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            map: this.textureLoader.load('/assets/textures/livelaughlove.png')
+        });
         this.alphabet = new THREE.Mesh(geometry, material);
         this.alphabet.rotateY(-Math.PI / 2);
         this.alphabet.position.set(299.9, 65, 60);
@@ -161,11 +196,26 @@ class Room {
         this.alphabet.receiveShadow = true;
         this.scene.add(this.alphabet);
 
+        this.textures[0] = this.textureLoader.load('public/assets/textures/metal-shipping-container-bl/metal-shipping-container_albedo.png')
+        this.textures[1] = this.textureLoader.load('public/assets/textures/metal-shipping-container-bl/metal-shipping-container_roughness.png')
+        this.textures[2] = this.textureLoader.load('public/assets/textures/metal-shipping-container-bl/metal-shipping-container_metallic.png')
+        this.textures[3] = this.textureLoader.load('public/assets/textures/metal-shipping-container-bl/metal-shipping-container_normal-ogl.png')
+        this.textures[4] = this.textureLoader.load('public/assets/textures/metal-shipping-container-bl/metal-shipping-container_ao.png')
+
+        this.buttonMaterial = new THREE.MeshStandardMaterial({
+            color: 0x808080,
+            map: this.textures[0],
+            roughnessMap: this.textures[1],
+            metalnessMap: this.textures[2],
+            normalMap: this.textures[3],
+            aoMap: this.textures[4]
+        });
+
         // Buttons set up
         // Button 1 (middle)
         geometry = new THREE.BoxGeometry(9, 14, 5);
-        material = new THREE.MeshStandardMaterial({ color: 0x500000 });
-        this.buttons[0] = new THREE.Mesh(geometry, material);
+        material = new THREE.MeshStandardMaterial({ color: 0x505050 });
+        this.buttons[0] = new THREE.Mesh(geometry, this.buttonMaterial);
         this.buttons[0].position.set(230, 55, 2.5);
         this.buttons[0].castShadow = true;
         this.buttons[0].receiveShadow = true;
@@ -173,11 +223,8 @@ class Room {
         this.text[0].position.copy(this.buttons[0].position);
         // this.text[0].translateY(14);
         this.text[0].translateZ(2.5);
-        // this.text[0].mesh.castShadow = true;
-        // this.text[0].mesh.receiveShadow = true;
         // Button 2 (left)
-        material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        this.buttons[1] = new THREE.Mesh(geometry, material);
+        this.buttons[1] = new THREE.Mesh(geometry, this.buttonMaterial);
         this.buttons[1].position.copy(this.buttons[0].position);
         this.buttons[1].position.x += -28;
         this.buttons[1].castShadow = true;
@@ -187,8 +234,7 @@ class Room {
         // this.text[0].translateY(14);
         this.text[1].translateZ(2.5);
         // Button 3 (right)
-        material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-        this.buttons[2] = new THREE.Mesh(geometry, material);
+        this.buttons[2] = new THREE.Mesh(geometry, this.buttonMaterial);
         this.buttons[2].position.copy(this.buttons[0].position);
         this.buttons[2].position.x += 28;
         this.buttons[2].castShadow = true;
@@ -198,19 +244,32 @@ class Room {
         // this.text[0].translateY(14);
         this.text[2].translateZ(2.5);
         // Button 4 (Exit)
-        material = new THREE.MeshStandardMaterial({ color: 0x00ffff });
-        this.buttons[3] = new THREE.Mesh(geometry, material);
+        this.buttons[3] = new THREE.Mesh(geometry, this.buttonMaterial);
         this.buttons[3].rotateY(Math.PI / 2);
         this.buttons[3].position.set(2.5, 55, 200);
         this.buttons[3].castShadow = true;
         this.buttons[3].receiveShadow = true;
         this.scene.add(...this.buttons);
 
+        this.textures[0] = this.textureLoader.load('/assets/textures/grimy-metal-bl/grimy-metal-albedo.png')
+        this.textures[1] = this.textureLoader.load('/assets/textures/grimy-metal-bl/grimy-metal-metalness.png')
+        this.textures[2] = this.textureLoader.load('/assets/textures/grimy-metal-bl/grimy-metal-roughness.png')
+        this.textures[3] = this.textureLoader.load('public/assets/textures/grimy-metal-bl/grimy-metal-normal-ogl.png')
+
+        this.metal = new THREE.MeshStandardMaterial({
+            color: 0x505050,
+            map: this.textures[0],
+            metalnessMap: this.textures[1],
+            roughnessMap: this.textures[2],
+            normalMap: this.textures[3],
+        });
+
+
         // Pipes setup
         geometry = new THREE.CylinderGeometry(10, 10, 100, 32);
         material = new THREE.MeshStandardMaterial({ color: 0x505050 });
         // Middle 
-        this.pipes[0] = new THREE.Mesh(geometry, material);
+        this.pipes[0] = new THREE.Mesh(geometry, this.metal);
         this.pipes[0].position.set(160, 50, 60);
         this.pipes[0].castShadow = true;
         this.pipes[0].receiveShadow = true;
@@ -293,6 +352,7 @@ class Room {
         this.interactiveOb.push(this.staircase);
         this.Lshapes.forEach((valve) => this.interactiveOb.push(valve));
         this.interactiveOb.push(this.exitBorder, this.letter, this.alphabet);
+
     }
 
     #setUpBoundignBoxes() {
@@ -346,7 +406,8 @@ class Room {
 
         // Create the ring part of the valve
         var geometry = new THREE.TorusGeometry(10, 2, 16, 100);
-        var material = new THREE.MeshStandardMaterial({ color: 0x555555 });
+        var material = this.metal.clone();
+        material.color.set(0x555555);
         var ring = new THREE.Mesh(geometry, material);
 
         // Create the first bar 
@@ -378,15 +439,16 @@ class Room {
 
         // Create the the handrails
         var geometry = new THREE.CylinderGeometry(2.5, 2.5, 100, 32);
-        var material = new THREE.MeshStandardMaterial({ color: 0x777777 });
+        var material = this.metal.clone()
+        material.color.set(0x777777);
         var leftHandrail = new THREE.Mesh(geometry, material);
         leftHandrail.position.x += -15;
-        // leftHandrail.castShadow = true;
-        // leftHandrail.receiveShadow = true;
+        leftHandrail.castShadow = true;
+        leftHandrail.receiveShadow = true;
         var rightHandrail = leftHandrail.clone();
         rightHandrail.position.x += 30;
-        // rightHandrail.castShadow = true;
-        // rightHandrail.receiveShadow = true;
+        rightHandrail.castShadow = true;
+        rightHandrail.receiveShadow = true;
 
         // Initialize an array to hold the steps
         var steps = [];
