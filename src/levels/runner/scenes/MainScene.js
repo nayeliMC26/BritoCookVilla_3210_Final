@@ -47,7 +47,7 @@ class MainScene {
 
         // Create moonlight
         this.moonLight = new DirectionalLight(0xfcfcd7, 0.5);
-        this.moonLight.position.set(100, 50, -50);
+        this.moonLight.position.set(100, 50, 50);
         this.moonLight.castShadow = true;
         this.moonLight.shadow.mapSize.width = 2048;
         this.moonLight.shadow.mapSize.height = 2048;
@@ -149,11 +149,17 @@ class MainScene {
     endGame() {
         // Stop the game
         this.started = false;
-
-        // Show the end screen
+    
+        // Ensure the end screen is shown
         const endScreen = document.getElementById("end-screen");
-        endScreen.style.display = "flex"; // Make it visible
-
+        if (endScreen) {
+            endScreen.style.display = "flex"; // Make it visible
+            endScreen.style.flexDirection = "column";
+            endScreen.style.alignItems = "center";
+        } else {
+            console.error("End screen element not found!");
+        }
+    
         // Clear the scene
         this.clear();
     }
