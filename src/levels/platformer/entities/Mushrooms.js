@@ -18,9 +18,5 @@ class Mushrooms {
         this.physicsEngine.addObject(new PhysicsObject(scene, this.mesh, false, true, 'mushroom'));
 
     }
-
-    update(deltaTime){
-        this.physicsEngine.update(deltaTime);
-    }
 }
 export default Mushrooms;

@@ -13,6 +13,27 @@ body {
     justify-content: center; /* Centers content horizontally */
     align-items: center; /* Centers content vertically */
     overflow: hidden;
+
+    position: relative;
+}
+
+#ui {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Move to the top-right corner */
+    display: flex;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    color: white;
+    z-index: 10; /* Ensure it appears above the canvas */
+}
+
+#mushroom-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+=======
 }
 
 #end-screen {
@@ -51,4 +72,5 @@ body {
 
 #restart-btn:hover {
     background: #d84343;
+
 }

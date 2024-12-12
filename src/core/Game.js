@@ -61,12 +61,6 @@ class Game {
         if (this.activeLevel instanceof Runner) {
             this.activeLevel.start(); // Start the Runner game when it becomes active
         }
-
-        // Add orbit controls for debugging
-        // if (this.activeLevel.camera) {
-        // this.controls = new OrbitControls(this.activeLevel.camera, this.renderer.domElement);
-        // this.controls.update();
-        // }
     }
 
     update(deltaTime) {

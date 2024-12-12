@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import playerData from './playerData';
+
 /* A class for physics object that can be added to the physics engine */
 class PhysicsObject {
     // Physics objects can be either static or dynamic
@@ -19,10 +21,18 @@ class PhysicsObject {
 
         // Create a Box3 for collision detection
         this.boundingBox = new THREE.Box3().setFromCenterAndSize(this.position, this.size);
+        // console.log(this.boundingBox)
 
         // Create Box3Helper to visualize the bounding box
         this.boundingBoxHelper = new THREE.Box3Helper(this.boundingBox, 0xff0000);
-        this.scene.add(this.boundingBoxHelper);
+        //this.scene.add(this.boundingBoxHelper);
+
+        this.mushroomCount = 0;
+
+        // UI Element for displaying the count (Add this)
+        this.uiElement = document.getElementById("mushroom-count");
+
+        this.endGameTriggered = false; 
     }
 
     updateBoundingBox() {
@@ -57,54 +67,110 @@ class PhysicsObject {
         return this.boundingBox.intersectsBox(otherObject.boundingBox);
     }
 
+    /**
+     * A function which handles the different kinds of collisions between physics objects 
+     * @param {PhysicsObject} otherObject 
+     */
     resolveCollision(otherObject) {
-        if (this.checkCollision(otherObject)) {
-            if (this.isDynamic && !otherObject.isDynamic) {
-                // Calculate the differences in positions along each axis
-                var dx = this.position.x - otherObject.position.x;
-                var dy = this.position.y - otherObject.position.y;
-                var dz = this.position.z - otherObject.position.z;
+        if (!this.checkCollision(otherObject)) return;
+        // Calculate the differences in positions along each axis
+        var dx = this.position.x - otherObject.position.x;
+        var dy = this.position.y - otherObject.position.y;
+        var dz = this.position.z - otherObject.position.z;
 
-                // Calculate the overlap on each axis
-                var overlapX = (this.size.x + otherObject.size.x) / 2 - Math.abs(dx);
-                var overlapY = (this.size.y + otherObject.size.y) / 2 - Math.abs(dy);
-                var overlapZ = (this.size.z + otherObject.size.z) / 2 - Math.abs(dz);
+        // Calculate the overlap on each axis
+        var overlapX = (this.size.x + otherObject.size.x) / 2 - Math.abs(dx);
+        var overlapY = (this.size.y + otherObject.size.y) / 2 - Math.abs(dy);
+        var overlapZ = (this.size.z + otherObject.size.z) / 2 - Math.abs(dz);
 
-                // Resolve collision based on smallest overlap
-                if (overlapX < overlapY && overlapX < overlapZ) {
-                    // Handle collision on the X-axis
-                    if (dx > 0) {
-                        this.position.x += overlapX;
-                    } else {
-                        this.position.x -= overlapX;
-                    }
-                    this.velocity.x = 0;  // Stop horizontal velocity
-                } else if (overlapY < overlapZ) {
-                    // Handle collision on the Y-axis
-                    if (dy > 0) {
-                        this.position.y += overlapY;
-                        if (this.velocity.y < 0) {
-                            this.velocity.y = 0; // Stop downward velocity
-                        }
-                    } else {
-                        this.position.y -= overlapY;  // Move downward
-                        if (this.velocity.y > 0) {
-                            this.velocity.y = 0;  // Stop upward movement
-                        }
-                    }
-                } else {
-                    // Handle collision on the Z-axis
-                    if (dz > 0) {
-                        this.position.z += overlapZ;
-                    } else {
-                        this.position.z -= overlapZ;
-                    }
-                    this.velocity.z = 0;  // Stop forward/backward velocity
-                }
+        // Resolve collision based on smallest overlap
+        if (overlapX <= 0 || overlapY <= 0 || overlapZ <= 0) return;
+
+        // Determine the axis with the smallest overlap
+        var axis;
+        var overlap;
+        if (overlapX < overlapY && overlapX < overlapZ) {
+            axis = 'x';
+            overlap = overlapX;
+        } else if (overlapY < overlapZ) {
+            axis = 'y';
+            overlap = overlapY;
+        } else {
+            axis = 'z';
+            overlap = overlapZ;
+        }
+
+        var delta;
+        if (axis === 'x') {
+            delta = dx;
+        } else if (axis === 'y') {
+            delta = dy;
+        } else {
+            delta = dz;
+        }
+
+        var direction;
+        if (delta > 0) {
+            direction = 1;
+        } else {
+            direction = -1;
+        }
+
+
+        if (this.isDynamic && !otherObject.isDynamic) {
+            // Dynamic object collides with static object
+            this.position[axis] += direction * overlap;
+            if (axis === 'y') {
+                this.velocity[axis] = 0; // Y-axis velocity always reset
+            } else {
+                this.velocity[axis] = 0; // Stop movement on other axes
             }
-            if (otherObject.isCollectible == true) {
-                this.collectObject(otherObject);
+        } else if (this.isDynamic && otherObject.isDynamic) {
+            // Dynamic object collides with another dynamic object
+            this.position[axis] += direction * (overlap / 2);
+            otherObject.position[axis] -= direction * (overlap / 2);
+
+            if (axis === 'y') {
+                this.velocity[axis] = 0;
+                otherObject.velocity[axis] = 0;
+            } else {
+                this.velocity[axis] *= 0.8; // Apply friction
+                otherObject.velocity[axis] *= 0.8; // Apply friction
             }
+        } else if (this.id === 'player' && otherObject.isDynamic) {
+            // Player collides with a dynamic object
+            this.position[axis] += direction * overlap;
+            otherObject.position[axis] -= direction * overlap;
+
+            if (axis === 'y') {
+                this.velocity[axis] = 0;
+                otherObject.velocity[axis] = 0;
+            } else {
+                this.velocity[axis] *= 0.8; // Apply friction
+                otherObject.velocity[axis] *= 0.8; // Apply friction
+            }
+        } else if (this.id === 'player' && !otherObject.isDynamic) {
+            // Player collides with a static object
+            this.position[axis] += direction * overlap;
+            if (axis === 'y') {
+                this.velocity[axis] = 0; // Y-axis velocity always reset
+            } else {
+                this.velocity[axis] = 0; // Stop movement on other axes
+            }
+        }
+
+        if (this.id === 'player' && otherObject.id == 'glass') {
+            otherObject.isDynamic = true;
+        }
+
+        if (this.id === 'player' && otherObject.isCollectible) {
+            this.collectObject(otherObject);
+            this.mushroomCount++
+            playerData.mushroomCount++
+            console.log(playerData.mushroomCount)
+
+
+            this.uiElement.textContent = `${this.mushroomCount} / 5`;
         }
     }
 
